@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "21905874563",
+    "project_id": "gofinder-cc80f",
+    "storage_bucket": "gofinder-cc80f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:21905874563:android:80c0f089172b4a01cd05b6",
+        "android_client_info": {
+          "package_name": "com.example.gofinder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAI9LpRKU5FFpTClgXU_EGw64zoocSEj8I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
