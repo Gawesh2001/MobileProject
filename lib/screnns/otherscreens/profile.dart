@@ -1,8 +1,10 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_build_context_synchronously, avoid_print, use_key_in_widget_constructors
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gofinder/screnns/authentication/sign_in.dart'; // Assuming this import is correct
+import 'package:gofinder/screnns/otherscreens/workreg.dart';
 
 class ProfilePage extends StatelessWidget {
   // Function to show logout confirmation dialog
@@ -47,41 +49,154 @@ class ProfilePage extends StatelessWidget {
     }
   }
 
+  // Function to fetch user's name from Firestore
+  Future<String> _fetchUserName(String userId) async {
+    try {
+      // Access Firestore collection "workerregister" to get the name
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('workerregister')
+          .doc(userId)
+          .get();
+
+      if (userDoc.exists) {
+        // If user document exists, return the name
+        return userDoc['name'] ?? 'No Name Available';
+      } else {
+        return 'No Name Available';
+      }
+    } catch (e) {
+      print("Error fetching user name: $e");
+      return 'Error fetching name';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Profile',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: const Color(0xff0079C2),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () =>
-                _confirmLogout(context), // Call confirmation dialog
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              backgroundImage: NetworkImage(
-                'https://i.pinimg.com/736x/03/eb/d6/03ebd625cc0b9d636256ecc44c0ea324.jpg',
+    final user = FirebaseAuth.instance.currentUser;
+
+    return FutureBuilder<String>(
+      future: _fetchUserName(user?.uid ?? ''),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                'Profile',
+                style: TextStyle(color: Colors.white),
               ),
-              radius: 50,
+              backgroundColor: const Color(0xff0079C2),
             ),
-            SizedBox(height: 20),
-            Text(
-              'Profile Page',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                'Profile',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: const Color(0xff0079C2),
             ),
-          ],
-        ),
-      ),
+            body: Center(child: Text('Error: ${snapshot.error}')),
+          );
+        }
+
+        final userName = snapshot.data ?? 'No Name Available';
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              'Profile',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: const Color(0xff0079C2),
+            actions: [
+              // IconButton(
+              //   icon: const Icon(Icons.logout, color: Colors.white),
+              //   onPressed: () =>
+              //       _confirmLogout(context), // Call confirmation dialog
+              // ),
+            ],
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Displaying the user name instead of user ID
+                Text("Name: $userName",
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text("Email: ${user?.email ?? 'Not Available'}",
+                    style: TextStyle(fontSize: 16)),
+                SizedBox(height: 20),
+                CircleAvatar(
+                  backgroundImage: NetworkImage(
+                    'https://i.pinimg.com/736x/03/eb/d6/03ebd625cc0b9d636256ecc44c0ea324.jpg',
+                  ),
+                  radius: 50,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Profile Page',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 30),
+                // Options Section
+                ListTile(
+                  leading: Icon(Icons.app_registration, color: Colors.blue),
+                  title: Text("Register"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => WorkReg()),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.work, color: Colors.green),
+                  title: Text("Jobs"),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: Icon(Icons.supervised_user_circle,
+                      color: const Color.fromARGB(255, 195, 197, 45)),
+                  title: Text("User Profile"),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading:
+                      Icon(Icons.settings_accessibility, color: Colors.green),
+                  title: Text("Provider Profile"),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: Icon(Icons.flag, color: Colors.green),
+                  title: Text("On Going Jobs"),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: Icon(Icons.settings,
+                      color: const Color.fromARGB(255, 209, 114, 5)),
+                  title: Text("Settings"),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: Icon(Icons.attach_money, color: Colors.orange),
+                  title: Text("Income"),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: Icon(Icons.logout, color: Colors.red),
+                  title: Text("Log Out"),
+                  onTap: () => _confirmLogout(context),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
