@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gofinder/screnns/authentication/sign_in.dart'; // Assuming this import is correct
+import 'package:gofinder/screnns/otherscreens/provider_profile.dart';
 import 'package:gofinder/screnns/otherscreens/workreg.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -169,7 +170,12 @@ class ProfilePage extends StatelessWidget {
                   leading:
                       Icon(Icons.settings_accessibility, color: Colors.green),
                   title: Text("Provider Profile"),
-                  onTap: () {},
+                  onTap: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (context) =>WorkerProfile())
+                  );
+                  },
                 ),
                 ListTile(
                   leading: Icon(Icons.flag, color: Colors.green),
