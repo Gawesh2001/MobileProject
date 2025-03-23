@@ -11,7 +11,6 @@ class _WorkerProfileState extends State<WorkerProfile> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late Stream<DocumentSnapshot> _userStream;
-  late Stream<QuerySnapshot> _scheduleStream;
   String? documentId;
 
   @override
@@ -32,13 +31,9 @@ class _WorkerProfileState extends State<WorkerProfile> {
       if (querySnapshot.docs.isNotEmpty) {
         setState(() {
           documentId = querySnapshot.docs.first.id;
-          _userStream = _firestore.collection("workerregister").doc(documentId).snapshots();
-
-          // Fetch schedules for the worker
-          _scheduleStream = _firestore
-              .collection("schedules")
-              .where("workerId", isEqualTo: user.uid)
-              .orderBy("date")
+          _userStream = _firestore
+              .collection("workerregister")
+              .doc(documentId)
               .snapshots();
         });
       }
@@ -55,10 +50,12 @@ class _WorkerProfileState extends State<WorkerProfile> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xff0060D0),
-        title: const Text("Worker Profile", style: TextStyle(color: Colors.white, fontSize: 22)),
+        title: const Text("Worker Profile",
+            style: TextStyle(color: Colors.white, fontSize: 22)),
         centerTitle: true,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(20))),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(20))),
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: _userStream,
@@ -67,12 +64,25 @@ class _WorkerProfileState extends State<WorkerProfile> {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: Text("No profile data found.", style: TextStyle(fontSize: 16, color: Colors.black54)));
+            return const Center(
+                child: Text("No profile data found.",
+                    style: TextStyle(fontSize: 16, color: Colors.black54)));
           }
 
           var userData = snapshot.data!;
           String name = userData["name"] ?? "Unknown";
           String email = userData["email"] ?? "No Email";
+          String userId = userData["userId"] ?? "No User ID";
+          String jobTitle = userData["jobTitle"] ?? "";
+
+          if (jobTitle == "User") {
+            return Center(
+              child: Text(
+                "You are not a service provider.",
+                style: TextStyle(fontSize: 18, color: Colors.black54),
+              ),
+            );
+          }
 
           return Padding(
             padding: const EdgeInsets.all(20.0),
@@ -81,9 +91,9 @@ class _WorkerProfileState extends State<WorkerProfile> {
               children: [
                 _buildProfileHeader(),
                 const SizedBox(height: 20),
-                _buildProfileCard(name, email),
+                _buildProfileCard(name, email, userId),
                 const SizedBox(height: 20),
-                _buildScheduleSection(),
+                _buildJobList(userId),
               ],
             ),
           );
@@ -106,7 +116,7 @@ class _WorkerProfileState extends State<WorkerProfile> {
     );
   }
 
-  Widget _buildProfileCard(String name, String email) {
+  Widget _buildProfileCard(String name, String email, String userId) {
     return Card(
       color: Colors.blue.shade50,
       shape: RoundedRectangleBorder(
@@ -121,6 +131,8 @@ class _WorkerProfileState extends State<WorkerProfile> {
             _buildProfileDetail("Name: $name", Icons.person),
             const SizedBox(height: 10),
             _buildProfileDetail("Email: $email", Icons.email),
+            const SizedBox(height: 10),
+            _buildProfileDetail("User ID: $userId", Icons.account_circle),
           ],
         ),
       ),
@@ -132,80 +144,154 @@ class _WorkerProfileState extends State<WorkerProfile> {
       children: [
         Icon(icon, color: const Color(0xff0060D0)),
         const SizedBox(width: 10),
-        Expanded(child: Text(detail, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500))),
+        Expanded(
+            child: Text(detail,
+                style: const TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.w500))),
       ],
     );
   }
 
-  Widget _buildScheduleSection() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _scheduleStream,
+  // This function fetches the job data from the "jobs" collection
+  Widget _buildJobList(String userId) {
+    return FutureBuilder<QuerySnapshot>(
+      future: _firestore
+          .collection("jobs")
+          .where("worker", isEqualTo: userId)
+          .get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.only(top: 20),
-            child: Center(child: Text("No upcoming schedules.", style: TextStyle(fontSize: 16, color: Colors.black54))),
-          );
+          return const Center(
+              child: Text("No jobs found.",
+                  style: TextStyle(fontSize: 16, color: Colors.black54)));
         }
 
-        var schedules = snapshot.data!.docs;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Upcoming Schedules:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xff0060D0)),
-            ),
-            const SizedBox(height: 10),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: schedules.length,
-              itemBuilder: (context, index) {
-                var schedule = schedules[index];
-                String task = schedule["task"] ?? "No task";
-                DateTime date = (schedule["date"] as Timestamp).toDate();
-                String formattedDate = "${date.day}/${date.month}/${date.year}";
-                String formattedTime = "${date.hour}:${date.minute.toString().padLeft(2, '0')}";
+        var jobDocs = snapshot.data!.docs;
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: jobDocs.length,
+          itemBuilder: (context, index) {
+            var jobData = jobDocs[index];
+            String customerUserId = jobData["customer"] ?? "No User ID";
+            String jobId = jobData.id;
+            String text = jobData["text"] ?? "No Text Provided";
 
-                return Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  elevation: 3,
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(15),
-                    title: Text(task, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                    subtitle: Text("Date: $formattedDate\nTime: $formattedTime"),
-                    leading: const Icon(Icons.schedule, color: Color(0xff0060D0)),
-                  ),
-                );
-              },
-            ),
-          ],
+            // Fetch the customer's name based on the customerUserId
+            return _buildJobContainer(customerUserId, text, jobId);
+          },
         );
       },
     );
   }
 
-  Widget _buildEditButton() {
-    return Center(
-      child: ElevatedButton(
-        onPressed: () {
-          // Implement edit functionality here
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xff0060D0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-        ),
-        child: const Text(
-          "Edit Profile",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
-        ),
+  // Function to get the customer name based on userId
+  Future<String> _getCustomerName(String userId) async {
+    QuerySnapshot customerSnapshot = await _firestore
+        .collection("workerregister")
+        .where("userId", isEqualTo: userId)
+        .limit(1)
+        .get();
+
+    if (customerSnapshot.docs.isNotEmpty) {
+      DocumentSnapshot customerDoc = customerSnapshot.docs.first;
+      return customerDoc["name"] ?? "Unknown";
+    } else {
+      return "Customer Not Found";
+    }
+  }
+
+  // Display customer name and job text
+  Widget _buildJobContainer(String customerUserId, String text, String jobId) {
+    return FutureBuilder<String>(
+      future: _getCustomerName(customerUserId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+
+        if (snapshot.hasData) {
+          String customerName = snapshot.data ?? "Customer Not Found";
+          return _buildJobCard(customerName, text, jobId);
+        }
+
+        return const Center(child: Text("Error fetching customer name"));
+      },
+    );
+  }
+
+  Widget _buildJobCard(String customer, String text, String jobId) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(15.0),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Customer: $customer",
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "Job Description: $text",
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  _updateJobStatus(jobId, "accepted");
+                },
+                child: const Text("Accept Job"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff0060D0),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                ),
+              ),
+              const SizedBox(width: 20),
+              ElevatedButton(
+                onPressed: () {
+                  _updateJobStatus(jobId, "rejected");
+                },
+                child: const Text("Reject Job"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
+  }
+
+  // Function to update the job status
+  void _updateJobStatus(String jobId, String status) async {
+    try {
+      await _firestore.collection("jobs").doc(jobId).update({
+        "status": status,
+      });
+      print("Job $jobId status updated to $status.");
+    } catch (e) {
+      print("Error updating job status: $e");
+    }
   }
 }

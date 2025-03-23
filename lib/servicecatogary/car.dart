@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth
 import 'package:gofinder/navigators/bottomnavigatorbar.dart'; // Import BottomNavigatorBar
 import 'package:gofinder/screnns/home/home.dart'; // Import Home.dart
+import 'package:gofinder/Booking/bookingpage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
-      home: CarListScreen(), // ✅ Car Worker List Screen
+      home: CarListScreen(),
     );
   }
 }
@@ -27,18 +29,48 @@ class CarListScreen extends StatefulWidget {
 }
 
 class _CarListScreenState extends State<CarListScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance; // FirebaseAuth instance
+  String uid = 'Loading...'; // Placeholder for UID
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserUid(); // Fetch UID when the widget initializes
+  }
+
+  // Function to fetch the current user's UID
+  void _getUserUid() {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      setState(() {
+        uid = user.uid; // Update UID
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          CustomAppBar(title: "Car"), // ✅ Updated App Bar
+          CustomAppBar(title: "Home"), // ✅ Updated App Bar
+          // Padding(
+          // padding: EdgeInsets.all(16.0),
+          // child: Text(
+          //'Your UID: $uid', // Display UID
+          // style: TextStyle(
+          //  fontSize: 16,
+          //  fontWeight: FontWeight.bold,
+          //  color: Colors.blue.shade900,
+          // ),
+          // ),
+          //),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('workerregister')
-                  .where('jobTitle', isEqualTo: 'Car') // ✅ Only Car Workers
+                  .where('jobTitle', isEqualTo: 'Car')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -48,7 +80,7 @@ class _CarListScreenState extends State<CarListScreen> {
                   return Center(child: Text("Error: ${snapshot.error}"));
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text("No car workers found"));
+                  return Center(child: Text("No workers found"));
                 }
 
                 var workers = snapshot.data!.docs;
@@ -59,10 +91,25 @@ class _CarListScreenState extends State<CarListScreen> {
                   itemBuilder: (context, index) {
                     var data = workers[index].data() as Map<String, dynamic>;
                     return WorkerCard(
+                      userId: data['userId'] ?? 'N/A',
                       name: data['name'] ?? 'No Name',
                       age: data['age'] ?? 'N/A',
                       rating: data['rating']?.toString() ?? '0.00',
                       imageUrl: data['imageUrl'] ?? '',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookingPage(
+                              userId: data['userId'] ?? 'N/A',
+                              name: data['name'] ?? 'No Name',
+                              age: data['age'] ?? 'N/A',
+                              rating: data['rating']?.toString() ?? '0.00',
+                              imageUrl: data['imageUrl'] ?? '',
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 );
@@ -84,10 +131,10 @@ class CustomAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 130,
+      height: 130, // Increased height
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.blue.shade900, Colors.blueAccent],
+          colors: [Colors.blue.shade900, Colors.blueAccent], // Blue Gradient
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -99,6 +146,7 @@ class CustomAppBar extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
+          // 🔹 Back Arrow that navigates to Home.dart
           Positioned(
             left: 10,
             top: 55,
@@ -107,7 +155,8 @@ class CustomAppBar extends StatelessWidget {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => Home()),
+                  MaterialPageRoute(
+                      builder: (context) => Home()), // ✅ Navigates to Home.dart
                 );
               },
             ),
@@ -117,7 +166,7 @@ class CustomAppBar extends StatelessWidget {
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 26,
+                fontSize: 26, // Increased text size
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -129,18 +178,22 @@ class CustomAppBar extends StatelessWidget {
   }
 }
 
-// ✅ Worker Card UI
+// ✅ Worker Card UI (Updated)
 class WorkerCard extends StatefulWidget {
+  final String userId;
   final String name;
   final String age;
   final String rating;
   final String imageUrl;
+  final VoidCallback onTap;
 
   WorkerCard({
+    required this.userId,
     required this.name,
     required this.age,
     required this.rating,
     required this.imageUrl,
+    required this.onTap,
   });
 
   @override
@@ -152,59 +205,71 @@ class _WorkerCardState extends State<WorkerCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      elevation: 3,
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-      child: Padding(
-        padding: EdgeInsets.all(12),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundImage: widget.imageUrl.isNotEmpty
-                  ? NetworkImage(widget.imageUrl)
-                  : AssetImage('assets/default_avatar.png') as ImageProvider,
-            ),
-            SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widget.name,
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black)),
-                  SizedBox(height: 3),
-                  Text("${widget.age} years",
-                      style: TextStyle(color: Colors.black54, fontSize: 14)),
-                  SizedBox(height: 3),
-                  Row(
-                    children: [
-                      Icon(Icons.star, color: Colors.amber, size: 16),
-                      SizedBox(width: 5),
-                      Text(widget.rating,
-                          style: TextStyle(color: Colors.black54, fontSize: 14)),
-                    ],
-                  ),
-                ],
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Card(
+        color: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        elevation: 3,
+        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        child: Padding(
+          padding: EdgeInsets.all(12),
+          child: Row(
+            children: [
+              // Worker Profile Image
+              CircleAvatar(
+                radius: 28, // Slightly smaller avatar
+                backgroundImage: widget.imageUrl.isNotEmpty
+                    ? NetworkImage(widget.imageUrl)
+                    : AssetImage('assets/default_avatar.png') as ImageProvider,
               ),
-            ),
-            IconButton(
-              icon: Icon(
-                isSaved ? Icons.bookmark : Icons.bookmark_border,
-                color: isSaved ? Colors.yellow : Colors.grey,
-                size: 26,
+              SizedBox(width: 15),
+
+              // Worker Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(widget.name,
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black)),
+                    SizedBox(height: 3),
+                    Text("${widget.age} years",
+                        style: TextStyle(color: Colors.black54, fontSize: 14)),
+                    SizedBox(height: 3),
+                    Text("User ID: ${widget.userId}",
+                        style: TextStyle(color: Colors.black54, fontSize: 14)),
+                    SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.amber, size: 16),
+                        SizedBox(width: 5),
+                        Text(widget.rating,
+                            style:
+                                TextStyle(color: Colors.black54, fontSize: 14)),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              onPressed: () {
-                setState(() {
-                  isSaved = !isSaved;
-                });
-              },
-            ),
-          ],
+
+              // Save (Bookmark) Button
+              IconButton(
+                icon: Icon(
+                  isSaved ? Icons.bookmark : Icons.bookmark_border,
+                  color: isSaved ? Colors.yellow : Colors.grey,
+                  size: 26, // Smaller size
+                ),
+                onPressed: () {
+                  setState(() {
+                    isSaved = !isSaved;
+                  });
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
