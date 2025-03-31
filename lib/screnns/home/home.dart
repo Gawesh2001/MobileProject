@@ -1,7 +1,7 @@
-// main.dart
-// ignore_for_file: use_key_in_widget_constructors, use_super_parameters, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_const_constructors_in_immutables, sized_box_for_whitespace
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gofinder/servicecatogary/car.dart';
 import 'package:gofinder/servicecatogary/cleaners.dart';
 import 'package:gofinder/servicecatogary/electrician.dart';
@@ -12,64 +12,198 @@ import 'package:gofinder/servicecatogary/homecaregory.dart';
 import 'package:gofinder/servicecatogary/painter.dart';
 import 'package:gofinder/servicecatogary/plumber.dart';
 import 'package:gofinder/navigators/bottomnavigatorbar.dart';
-import 'package:gofinder/screnns/otherscreens/profile.dart'; // Fixed typo in the file path
+import 'package:gofinder/screnns/otherscreens/profile.dart';
 
-void main() {
-  runApp(MyApp());
+class Home extends StatefulWidget {
+  const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
 }
 
-class MyApp extends StatelessWidget {
+class _HomeState extends State<Home> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _showWelcomeInfo = false;
+  int _currentFeaturedIndex = 0;
+  final PageController _featuredController = PageController(
+    viewportFraction: 0.85,
+    initialPage: 0,
+  );
+
+  // Featured services
+  final List<Map<String, dynamic>> _featuredServices = [
+    {
+      'title': 'Premium Home Cleaning',
+      'description': 'Professional cleaning services with eco-friendly products',
+      'image': 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&auto=format&fit=crop',
+      'screen': CleanerListScreen(),
+    },
+    {
+      'title': '24/7 Electrician',
+      'description': 'Certified electricians for all your urgent needs',
+      'image': 'https://images.unsplash.com/photo-1605170439002-90845e8c0137?w=600&auto=format&fit=crop',
+      'screen': ElectricianListScreen(),
+    },
+    {
+      'title': 'Auto Detailing',
+      'description': 'Complete interior and exterior car cleaning',
+      'image': 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&auto=format&fit=crop',
+      'screen': CarListScreen(),
+    },
+  ];
+
+  // All services
+  final List<Map<String, dynamic>> _allServices = [
+    {
+      'title': 'Electronics Repair',
+      'image': 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=600&auto=format&fit=crop',
+      'screen': ElectronicsListScreen(),
+    },
+    {
+      'title': 'Home',
+      'image': 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&auto=format&fit=crop',
+      'screen': WorkerListScreen(),
+    },
+    {
+      'title': 'Auto Mechanic',
+      'image': 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&auto=format&fit=crop',
+      'screen': CarListScreen(),
+    },
+    {
+      'title': 'Electrician',
+      'image': 'https://images.unsplash.com/photo-1605152276897-4f618f831968?w=600&auto=format&fit=crop',
+      'screen': ElectricianListScreen(),
+    },
+    {
+      'title': 'Furniture',
+      'image': 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&auto=format&fit=crop',
+      'screen': FurnitureListScreen(),
+    },
+    {
+      'title': 'Plumbing',
+      'image': 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
+      'screen': PlumberListScreen(),
+    },
+    {
+      'title': 'Painting',
+      'image': 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
+      'screen': PainterListScreen(),
+    },
+    {
+      'title': 'Gardening',
+      'image': 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600&auto=format&fit=crop',
+      'screen': GardnerListScreen(),
+    },
+    {
+      'title': 'Cleaning',
+      'image': 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=600&auto=format&fit=crop',
+      'screen': CleanerListScreen(),
+    },
+  ];
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Home(),
-    );
+  void initState() {
+    super.initState();
+    _checkFirstVisit();
+    _featuredController.addListener(() {
+      setState(() {
+        _currentFeaturedIndex = _featuredController.page?.round() ?? 0;
+      });
+    });
   }
-}
-
-class ServiceCard extends StatelessWidget {
-  final String title;
-  final String imageUrl;
-  final VoidCallback onTap;
-
-  const ServiceCard({
-    Key? key,
-    required this.title,
-    required this.imageUrl,
-    required this.onTap,
-  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
+  void dispose() {
+    _featuredController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _checkFirstVisit() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool hasVisited = prefs.getBool('hasVisited') ?? false;
+
+    if (!hasVisited) {
+      await prefs.setBool('hasVisited', true);
+      if (mounted) {
+        setState(() => _showWelcomeInfo = true);
+        _showWelcomeDialog();
+      }
+    }
+  }
+
+  String getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  }
+
+  void _showWelcomeDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0), // Reduced card roundness
+          borderRadius: BorderRadius.circular(30),
         ),
-        elevation: 5, // Reduced shadow
-        margin: EdgeInsets.all(10.0), // Reduced space outside the card
         child: Container(
-          height: 150, // Increased card height
+          padding: const EdgeInsets.all(30),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+          ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(10.0), // Rounded corners for image
-                child: Image.network(
-                  imageUrl,
-                  height: 120, // Image height stays the same
-                  width: 150,
-                  fit: BoxFit.cover, // Adjusts image scaling
+              const Icon(
+                Icons.handyman,
+                size: 80,
+                color: Color(0xFF0060D0),
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: Text(
+                  'Welcome to GoFinder!',
+                  style: GoogleFonts.poppins(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0060D0),
+                  ),
                 ),
               ),
-              SizedBox(height: 10), // Reduced spacing
+              const SizedBox(height: 20),
               Text(
-                title,
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500), // Reduced text size
+                'Find trusted professionals for all your service needs. Book instantly and get quality work done with ease.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 30),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF0060D0),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 5,
+                  ),
+                  child: Text(
+                    'GET STARTED',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -77,190 +211,377 @@ class ServiceCard extends StatelessWidget {
       ),
     );
   }
-}
 
-class Home extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xff0079C2),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildFeaturedServiceCard(Map<String, dynamic> service, int index) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => service['screen']),
+          );
+        },
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 4,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // Keep text left-aligned
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                child: Container(
+                  height: 180,
+                  width: double.infinity,
+                  child: Stack(
+                    children: [
+                      Image.network(
+                        service['image'],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Container(color: Colors.grey[200]),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.7),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 15,
+                        left: 15,
+                        right: 15,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start, // ✅ Left-align text
+                          children: [
+                            Text(
+                              service['title'],
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              service['description'],
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: Colors.white70,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded( // ✅ Makes the button section flexible
+                child: Center( // ✅ Ensures button is centered vertically
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => service['screen']),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF0060D0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: Text(
+                          'Book Now',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildServiceCard(Map<String, dynamic> service) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      elevation: 2,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => service['screen']),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Text(
-                'What are you looking for?',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              child: Container(
+                height: 108,
+                width: double.infinity,
+                child: Image.network(
+                  service['image'],
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Container(color: Colors.grey[200]),
+                ),
               ),
             ),
-            SizedBox(width: 10),
-            Spacer(), // Add spacing between text and profile icon
-            GestureDetector(
-              onTap: () {
-                // Navigate to the profile page
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProfilePage()),
-                );
-              },
+            Padding(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    service['title'],
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => service['screen']),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF0060D0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                      ),
+                      child: Text(
+                        'Book Now',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showWelcomeInfo) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _showWelcomeDialog());
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${getGreeting()}, User!',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            Text(
+              'Find Your Service Expert',
+              style: GoogleFonts.poppins(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notifications_none, color: Colors.grey[800], size: 28),
+            onPressed: () {},
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfilePage()),
+              );
+            },
+            child: Padding(
+              padding: EdgeInsets.only(right: 16),
               child: CircleAvatar(
+                radius: 18,
                 backgroundImage: NetworkImage(
                   'https://i.pinimg.com/736x/dd/14/05/dd1405df5ed7203c530fbdd0cc21cb24.jpg',
                 ),
-                radius: 20, // Adjust the size of the profile circle
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GridView.count(
-              crossAxisCount: 2,
+            // Search Bar
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(30),
+                shadowColor: Color(0xFF0060D0).withOpacity(0.1),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search for services...',
+                    hintStyle: GoogleFonts.poppins(color: Colors.grey[600]),
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    border: InputBorder.none,
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                  ),
+                  style: GoogleFonts.poppins(fontSize: 16),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                ),
+              ),
+            ),
+
+            // Featured Services Section
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Featured Services',
+                style: GoogleFonts.poppins(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+
+            // Featured Services Carousel
+            SizedBox(
+              height: 280, // Reduced height
+              child: PageView.builder(
+                controller: _featuredController,
+                scrollDirection: Axis.horizontal,
+                itemCount: _featuredServices.length,
+                itemBuilder: (context, index) {
+                  return _buildFeaturedServiceCard(_featuredServices[index], index);
+                },
+                padEnds: false,
+              ),
+            ),
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _featuredServices.length,
+                    (index) => Container(
+                  width: 8,
+                  height: 8,
+                  margin: EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _currentFeaturedIndex == index
+                        ? Color(0xFF0060D0)
+                        : Colors.grey[300],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 24),
+
+            // All Services Section
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'All Services',
+                style: GoogleFonts.poppins(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+
+            // All Services Grid
+            GridView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 12),
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 8.0, // Reduce vertical gap
-              crossAxisSpacing: 8.0, // Reduce horizontal gap
-              padding: EdgeInsets.all(8.0), // Reduce padding around grid
-              children: [
-                ServiceCard(
-                  title: 'Electronics',
-                  imageUrl:
-                      'https://i.pinimg.com/736x/e7/9e/85/e79e8518106c63dfe4868e36f5323527.jpg',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ElectronicsListScreen()),
-                    );
-                  },
-                ),
-                ServiceCard(
-                  title: 'Home',
-                  imageUrl:
-                      'https://i.pinimg.com/736x/b3/97/41/b39741b041d904006c846ef8b604fc68.jpg',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => WorkerListScreen()),
-                    );
-                  },
-                ),
-                ServiceCard(
-                  title: 'Car',
-                  imageUrl:
-                      'https://i.pinimg.com/736x/ab/bc/c4/abbcc4a8a481cf577dcb5c9fe29fd506.jpg',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => CarListScreen()),
-                    );
-                  },
-                ),
-                ServiceCard(
-                  title: 'Electrician',
-                  imageUrl:
-                      'https://i.pinimg.com/736x/21/4e/03/214e03a1bff1d663f1f9dfd8c5c3d1fe.jpg',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ElectricianListScreen()),
-                    );
-                  },
-                ),
-                ServiceCard(
-                  title: 'Furniture',
-                  imageUrl:
-                      'https://i.pinimg.com/736x/6f/28/c5/6f28c51ab2664cbaf5aeffef563d80e7.jpg',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => FurnitureListScreen()),
-                    );
-                  },
-                ),
-                ServiceCard(
-                  title: 'Plumber',
-                  imageUrl:
-                      'https://i.pinimg.com/736x/c0/fc/a9/c0fca9f9fb740c5f3538a438de5d7432.jpg',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PlumberListScreen()),
-                    );
-                  },
-                ),
-                ServiceCard(
-                  title: 'Painter',
-                  imageUrl:
-                      'https://i.pinimg.com/736x/bc/e2/5a/bce25aca4942720ce8d866f755dc511c.jpg',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PainterListScreen()),
-                    );
-                  },
-                ),
-                ServiceCard(
-                  title: 'Gardener',
-                  imageUrl:
-                      'https://i.pinimg.com/736x/0d/0b/7e/0d0b7e3fc5c45bfaa672334d9b1f9545.jpg',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => GardnerListScreen()),
-                    );
-                  },
-                ),
-                ServiceCard(
-                  title: 'Cleaner',
-                  imageUrl:
-                      'https://i.pinimg.com/736x/77/e5/7e/77e57e5a09caf5d188cfbf02502154c6.jpg',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CleanerListScreen()),
-                    );
-                  },
-                ),
-              ],
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.85,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: _allServices.length,
+              itemBuilder: (context, index) {
+                return _buildServiceCard(_allServices[index]);
+              },
             ),
+            SizedBox(height: 40),
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigatorBar(),
-    );
-  }
-}
-
-class ServiceImage extends StatelessWidget {
-  final String imageUrl;
-
-  ServiceImage({required this.imageUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8.0),
-        child: Image.network(
-          imageUrl,
-          width: 100,
-          height: 100,
-          fit: BoxFit.cover,
-        ),
-      ),
+      bottomNavigationBar: const BottomNavigatorBar(currentIndex: 0),
     );
   }
 }

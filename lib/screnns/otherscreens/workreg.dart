@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, use_key_in_widget_constructors, library_private_types_in_public_api
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +22,10 @@ class _WorkRegState extends State<WorkReg> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _rateController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
   String? _selectedJobTitle;
+  String? _selectedLocation;
   bool isWorker = false;
 
   final List<String> jobCategories = [
@@ -39,6 +40,35 @@ class _WorkRegState extends State<WorkReg> {
     "Cleaner"
   ];
 
+  // Sri Lankan districts with popular ones first
+  final List<String> districts = [
+    'Colombo',
+    'Kandy',
+    'Galle',
+    'Matara',
+    'Hambantota',
+    'Jaffna',
+    'Negombo',
+    'Kalutara',
+    'Gampaha',
+    'Kurunegala',
+    'Anuradhapura',
+    'Polonnaruwa',
+    'Badulla',
+    'Monaragala',
+    'Ratnapura',
+    'Kegalle',
+    'Nuwara Eliya',
+    'Trincomalee',
+    'Batticaloa',
+    'Ampara',
+    'Puttalam',
+    'Mannar',
+    'Vavuniya',
+    'Mullaitivu',
+    'Kilinochchi'
+  ];
+
   void _registerWorker() async {
     if (_formKey.currentState!.validate() &&
         (isWorker ? _selectedJobTitle != null : true)) {
@@ -46,10 +76,14 @@ class _WorkRegState extends State<WorkReg> {
         final user = FirebaseAuth.instance.currentUser;
         if (user == null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("User not logged in!")),
+            const SnackBar(content: Text("User not logged in!")),
           );
           return;
         }
+
+        // Convert rate to number before saving
+        double? rate = isWorker ? double.tryParse(_rateController.text) : null;
+        int? age = int.tryParse(_ageController.text);
 
         await FirebaseFirestore.instance.collection("workerregister").add({
           "userId": user.uid,
@@ -60,11 +94,14 @@ class _WorkRegState extends State<WorkReg> {
           "phone": _phoneController.text,
           "jobTitle": isWorker ? _selectedJobTitle : "User",
           "description": isWorker ? _descriptionController.text : "",
+          "rate": isWorker ? rate : null,
+          "age": age,
+          "location": _selectedLocation,
           "timestamp": FieldValue.serverTimestamp(),
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Registered successfully!")),
+          const SnackBar(content: Text("Registered successfully!")),
         );
         Navigator.pop(context);
       } catch (e) {
@@ -74,7 +111,7 @@ class _WorkRegState extends State<WorkReg> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please complete all required fields.")),
+        const SnackBar(content: Text("Please complete all required fields.")),
       );
     }
   }
@@ -83,7 +120,7 @@ class _WorkRegState extends State<WorkReg> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Registration",
           style: TextStyle(color: Colors.white),
         ),
@@ -91,7 +128,7 @@ class _WorkRegState extends State<WorkReg> {
         elevation: 5,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(26.0),
+        padding: const EdgeInsets.all(26.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -112,17 +149,17 @@ class _WorkRegState extends State<WorkReg> {
                         onPressed: () => setState(() => isWorker = false),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              !isWorker ? Colors.blue : Colors.grey,
+                          !isWorker ? Colors.blue : Colors.grey,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                           elevation: isWorker ? 5 : 0,
                         ),
                         child:
-                            Text("User", style: TextStyle(color: Colors.white)),
+                        const Text("User", style: TextStyle(color: Colors.white)),
                       ),
                     ),
-                    SizedBox(width: 0),
+                    const SizedBox(width: 0),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () => setState(() => isWorker = true),
@@ -133,49 +170,97 @@ class _WorkRegState extends State<WorkReg> {
                           ),
                           elevation: isWorker ? 5 : 0,
                         ),
-                        child: Text("Worker",
+                        child: const Text("Worker",
                             style: TextStyle(color: Colors.white)),
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Full Name",
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.person),
                 ),
                 validator: (value) => value!.isEmpty ? "Enter your name" : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Email (Optional)",
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.email),
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _phoneController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Phone Number",
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.phone),
                 ),
                 keyboardType: TextInputType.phone,
                 validator: (value) =>
-                    value!.isEmpty ? "Enter your phone number" : null,
+                value!.isEmpty ? "Enter your phone number" : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _ageController,
+                decoration: const InputDecoration(
+                  labelText: "Age",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.calendar_today),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your age';
+                  }
+                  final age = int.tryParse(value);
+                  if (age == null) {
+                    return 'Please enter a valid number';
+                  }
+                  if (age < 18) {
+                    return 'You must be at least 18 years old';
+                  }
+                  if (age > 100) {
+                    return 'Please enter a valid age';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                value: _selectedLocation,
+                decoration: const InputDecoration(
+                  labelText: "District",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.location_on),
+                ),
+                items: districts.map((String district) {
+                  return DropdownMenuItem<String>(
+                    value: district,
+                    child: Text(district),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedLocation = newValue;
+                  });
+                },
+                validator: (value) =>
+                value == null ? "Select your district" : null,
+              ),
+              const SizedBox(height: 10),
               if (isWorker) ...[
                 DropdownButtonFormField<String>(
                   value: _selectedJobTitle,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: "Job Title",
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.work),
@@ -192,34 +277,59 @@ class _WorkRegState extends State<WorkReg> {
                     });
                   },
                   validator: (value) =>
-                      value == null ? "Select a job title" : null,
+                  value == null ? "Select a job title" : null,
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _rateController,
+                  decoration: const InputDecoration(
+                    labelText: "Hourly Rate (\$)",
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.attach_money),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  validator: isWorker
+                      ? (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your hourly rate';
+                    }
+                    final rate = double.tryParse(value);
+                    if (rate == null) {
+                      return 'Please enter a valid number';
+                    }
+                    if (rate <= 0) {
+                      return 'Rate must be greater than 0';
+                    }
+                    return null;
+                  }
+                      : null,
+                ),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _descriptionController,
                   maxLines: 3,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: "Description (Optional)",
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.description),
                   ),
                 ),
               ],
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _registerWorker,
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 2),
+                    padding: const EdgeInsets.symmetric(vertical: 2),
                     backgroundColor: Colors.blue,
                     textStyle:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                   ),
                   child:
-                      Text("Register", style: TextStyle(color: Colors.white)),
+                  const Text("Register", style: TextStyle(color: Colors.white)),
                 ),
               ),
             ],

@@ -1,75 +1,131 @@
-// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors
-
-import 'package:gofinder/screnns/home/home.dart';
 import 'package:flutter/material.dart';
-// Import the Home page
+import 'package:gofinder/screnns/home/home.dart';
+import 'package:gofinder/screnns/otherscreens/profile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class BottomNavigatorBar extends StatelessWidget {
+class BottomNavigatorBar extends StatefulWidget {
+  final int currentIndex;
+  const BottomNavigatorBar({Key? key, required this.currentIndex}) : super(key: key);
+
+  @override
+  State<BottomNavigatorBar> createState() => _BottomNavigatorBarState();
+}
+
+class _BottomNavigatorBarState extends State<BottomNavigatorBar> {
+  late int _selectedIndex;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.currentIndex;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 20.0,
-          vertical: 4.0), // Reduced vertical padding to lift the background
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       child: Container(
+        height: 91,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30), // Rounded edges
-          boxShadow: const [
+          borderRadius: BorderRadius.circular(30),
+          color: Colors.white,
+          boxShadow: [
             BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10,
-              offset: Offset(1, 4), // Shadow for a lifted effect
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Color(0xff0079C2),
-
-            selectedItemColor: Colors.white, // Selected icon color
-            unselectedItemColor: Colors.white70, // Unselected icon color
-            iconSize: 24, // Keep the original icon size
-            selectedFontSize:
-                12, // Optional: Reduce label size for a more compact look
-            unselectedFontSize:
-                12, // Optional: Reduce label size for a more compact look
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home', // Added label
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          selectedItemColor: const Color(0xff0060D0),
+          unselectedItemColor: Colors.grey[400],
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          elevation: 0,
+          iconSize: 26,
+          onTap: (index) {
+            setState(() => _selectedIndex = index);
+            if (index == 0) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const Home()),
+              );
+            }
+            else if (index == 4) { // Profile icon index
+              final userId = _auth.currentUser?.uid ?? '';
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfilePage(),
+                  // If your ProfilePage constructor requires userId, pass it like this:
+                  // builder: (context) => ProfilePage(userId: userId),
+                ),
+              );
+            }
+            // Other buttons intentionally left non-functional
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Icon(Icons.home_outlined),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.favorite),
-                label: 'Favorite', // Added label
+              activeIcon: Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Icon(Icons.home_filled),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_today),
-                label: 'Calendar', // Added label
+              label: '',
+            ),
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Icon(Icons.favorite_outline),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.store),
-                label: 'Market', // Added label
+              activeIcon: Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Icon(Icons.favorite),
               ),
-            ],
-            currentIndex: 0, // Set the initial selected index
-            onTap: (index) {
-              if (index == 0) {
-                // If the Home icon is tapped, navigate to the Home page
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => Home()),
-                );
-              } else if (index == 1) {
-                // Navigate to the Favorite page (you can replace this with your actual page)
-              } else if (index == 2) {
-                // Navigate to the Calendar page (replace with your actual page)
-              } else if (index == 3) {
-                // Navigate to the Market page (replace with your actual page)
-              }
-            },
-          ),
+              label: '',
+            ),
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Icon(Icons.work_outline),
+              ),
+              activeIcon: Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Icon(Icons.work),
+              ),
+              label: '',
+            ),
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Icon(Icons.calendar_today_outlined),
+              ),
+              activeIcon: Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Icon(Icons.calendar_today),
+              ),
+              label: '',
+            ),
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Icon(Icons.person_outline),
+              ),
+              activeIcon: Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Icon(Icons.person),
+              ),
+              label: '',
+            ),
+          ],
         ),
       ),
     );

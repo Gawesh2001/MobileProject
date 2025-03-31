@@ -1,0 +1,2 @@
+C:/Users/nusra/IdeaProjects/MobileProject/android/app/.cxx/RelWithDebInfo/492g3b6v/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/nusra/IdeaProjects/MobileProject/android/app/.cxx/RelWithDebInfo/492g3b6v/arm64-v8a/CMakeFiles/rebuild_cache.dir
