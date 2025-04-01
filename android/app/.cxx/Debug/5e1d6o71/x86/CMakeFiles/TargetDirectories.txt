@@ -1,0 +1,2 @@
+/Users/lahirubasnayaka/MobileProject/android/app/.cxx/Debug/5e1d6o71/x86/CMakeFiles/edit_cache.dir
+/Users/lahirubasnayaka/MobileProject/android/app/.cxx/Debug/5e1d6o71/x86/CMakeFiles/rebuild_cache.dir
