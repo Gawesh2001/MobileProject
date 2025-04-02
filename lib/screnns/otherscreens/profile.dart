@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gofinder/screnns/authentication/sign_in.dart';
 import 'package:gofinder/screnns/otherscreens/ongoingjobs.dart';
@@ -110,10 +111,8 @@ class ProfilePage extends StatelessWidget {
   Future<String> _fetchUserName(String userId) async {
     try {
       // First try to get from users collection
-      DocumentSnapshot userDoc = await _firestore
-          .collection('users')
-          .doc(userId)
-          .get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(userId).get();
 
       if (userDoc.exists && userDoc.data() != null) {
         final userData = userDoc.data() as Map<String, dynamic>;
@@ -123,14 +122,13 @@ class ProfilePage extends StatelessWidget {
       }
 
       // If not found in users collection, try workerregister
-      DocumentSnapshot workerDoc = await _firestore
-          .collection('workerregister')
-          .doc(userId)
-          .get();
+      DocumentSnapshot workerDoc =
+          await _firestore.collection('workerregister').doc(userId).get();
 
       if (workerDoc.exists && workerDoc.data() != null) {
         final workerData = workerDoc.data() as Map<String, dynamic>;
-        if (workerData.containsKey('worker_name') && workerData['worker_name'] != null) {
+        if (workerData.containsKey('worker_name') &&
+            workerData['worker_name'] != null) {
           return workerData['worker_name'];
         }
       }
@@ -151,229 +149,219 @@ class ProfilePage extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            backgroundColor: Colors.white,
-            appBar: AppBar(
-              title: Text(
-                'Profile',
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+              backgroundColor: Colors.white,
+              appBar: AppBar(
+                title: Text(
+                  'Profile',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
+                backgroundColor: const Color(0xff0079C2),
+                elevation: 0,
+                centerTitle: true,
               ),
-              backgroundColor: const Color(0xff0079C2),
-              elevation: 0,
-              centerTitle: true,
-            ),
-            body: const Center(
-              child: CircularProgressIndicator(
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xff0079C2)),
-              ),
-            ));
-            }
+              body: const Center(
+                child: CircularProgressIndicator(
+                  valueColor:
+                      const AlwaysStoppedAnimation<Color>(Color(0xff0079C2)),
+                ),
+              ));
+        }
 
-            final userName = snapshot.data ?? 'No Name Available';
+        final userName = snapshot.data ?? 'No Name Available';
 
-          return Scaffold(
+        return Scaffold(
           backgroundColor: Colors.grey[50],
-            appBar: AppBar(
-              title: Text(
-                'Profile',
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              backgroundColor: const Color(0xff0079C2),
-              elevation: 0,
-              centerTitle: true,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.settings, color: Colors.white),
-                  onPressed: () {},
-                ),
-              ],
-            ),
-            body: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    // Profile Header
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 40,
-                            backgroundColor: Colors.grey[200],
-                            backgroundImage: const NetworkImage(
-                              'https://i.pinimg.com/736x/03/eb/d6/03ebd625cc0b9d636256ecc44c0ea324.jpg',
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  userName,
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.black,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  user?.email ?? 'Not Available',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Register Button
-                    _buildSectionCard(
-                      child: _buildListTile(
-                        icon: Icons.app_registration,
-                        iconColor: Colors.blue,
-                        title: "Register",
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => WorkReg()),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Jobs Button
-                    _buildSectionCard(
-                      child: _buildListTile(
-                        icon: Icons.work,
-                        iconColor: Colors.green,
-                        title: "Jobs",
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => JobsPage(
-                                userId: user?.uid ?? '',
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // User Profile Button
-                    _buildSectionCard(
-                      child: _buildListTile(
-                        icon: Icons.supervised_user_circle,
-                        iconColor: const Color.fromARGB(255, 195, 197, 45),
-                        title: "User Profile",
-                        onTap: () {},
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Provider Profile Button
-                    _buildSectionCard(
-                      child: _buildListTile(
-                        icon: Icons.settings_accessibility,
-                        iconColor: Colors.green,
-                        title: "Provider Profile",
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => WorkerProfile(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // On Going Jobs Button
-                    _buildSectionCard(
-                      child: _buildListTile(
-                        icon: Icons.flag,
-                        iconColor: Colors.green,
-                        title: "On Going Jobs",
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => OngoingJobsPage(
-                                userId: user?.uid ?? '',
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Settings Button
-                    _buildSectionCard(
-                      child: _buildListTile(
-                        icon: Icons.settings,
-                        iconColor: const Color.fromARGB(255, 209, 114, 5),
-                        title: "Settings",
-                        onTap: () {},
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Income Button
-                    _buildSectionCard(
-                      child: _buildListTile(
-                        icon: Icons.attach_money,
-                        iconColor: Colors.orange,
-                        title: "Income",
-                        onTap: () {},
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Log Out Button
-                    _buildSectionCard(
-                      child: _buildListTile(
-                        icon: Icons.logout,
-                        iconColor: Colors.red,
-                        title: "Log Out",
-                        onTap: () => _confirmLogout(context),
-                      ),
-                    ),
-                  ],
-                ),
+          appBar: AppBar(
+            title: Text(
+              'Profile',
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          );
-        },
+            backgroundColor: const Color(0xff0079C2),
+            elevation: 0,
+            centerTitle: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings, color: Colors.white),
+                onPressed: () {},
+              ),
+            ],
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Profile Header
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundColor: Colors.grey[200],
+                          backgroundImage: const NetworkImage(
+                            'https://i.pinimg.com/736x/03/eb/d6/03ebd625cc0b9d636256ecc44c0ea324.jpg',
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                userName,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                user?.email ?? 'Not Available',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Register Button
+                  _buildSectionCard(
+                    child: _buildListTile(
+                      icon: Icons.app_registration,
+                      iconColor: Colors.blue,
+                      title: "Register",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => WorkReg()),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Jobs Button
+                  _buildSectionCard(
+                    child: _buildListTile(
+                      icon: Icons.work,
+                      iconColor: Colors.green,
+                      title: "Jobs",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => JobsPage(
+                              userId: user?.uid ?? '',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Provider Profile Button
+                  _buildSectionCard(
+                    child: _buildListTile(
+                      icon: Icons.settings_accessibility,
+                      iconColor: Colors.green,
+                      title: "Provider Profile",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WorkerProfile(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // On Going Jobs Button
+                  _buildSectionCard(
+                    child: _buildListTile(
+                      icon: Icons.flag,
+                      iconColor: Colors.green,
+                      title: "On Going Jobs",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OngoingJobsPage(
+                              userId: user?.uid ?? '',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Settings Button
+                  _buildSectionCard(
+                    child: _buildListTile(
+                      icon: Icons.settings,
+                      iconColor: const Color.fromARGB(255, 209, 114, 5),
+                      title: "Settings",
+                      onTap: () {},
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Income Button
+                  _buildSectionCard(
+                    child: _buildListTile(
+                      icon: Icons.attach_money,
+                      iconColor: Colors.orange,
+                      title: "Income",
+                      onTap: () {},
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Log Out Button
+                  _buildSectionCard(
+                    child: _buildListTile(
+                      icon: Icons.logout,
+                      iconColor: Colors.red,
+                      title: "Log Out",
+                      onTap: () => _confirmLogout(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 

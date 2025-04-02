@@ -5,7 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class BottomNavigatorBar extends StatefulWidget {
   final int currentIndex;
-  const BottomNavigatorBar({Key? key, required this.currentIndex}) : super(key: key);
+  const BottomNavigatorBar({Key? key, required this.currentIndex})
+      : super(key: key);
 
   @override
   State<BottomNavigatorBar> createState() => _BottomNavigatorBarState();
@@ -26,7 +27,7 @@ class _BottomNavigatorBarState extends State<BottomNavigatorBar> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       child: Container(
-        height: 91,
+        height: 70,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
           color: Colors.white,
@@ -55,8 +56,8 @@ class _BottomNavigatorBarState extends State<BottomNavigatorBar> {
                 context,
                 MaterialPageRoute(builder: (context) => const Home()),
               );
-            }
-            else if (index == 4) { // Profile icon index
+            } else if (index == 4) {
+              // Profile icon index
               final userId = _auth.currentUser?.uid ?? '';
               Navigator.push(
                 context,

@@ -14,7 +14,8 @@ class OngoingJobsPage extends StatefulWidget {
   _OngoingJobsPageState createState() => _OngoingJobsPageState();
 }
 
-class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProviderStateMixin {
+class _OngoingJobsPageState extends State<OngoingJobsPage>
+    with SingleTickerProviderStateMixin {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -119,7 +120,8 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
 
     if (_selectedFilter != 'All') {
       filtered = filtered.where((job) {
-        return job['status']?.toString().toLowerCase() == _selectedFilter.toLowerCase();
+        return job['status']?.toString().toLowerCase() ==
+            _selectedFilter.toLowerCase();
       }).toList();
     }
 
@@ -245,7 +247,8 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                       ),
                       child: Text(
                         "YES",
@@ -327,7 +330,8 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                       ),
                       child: Text(
                         "YES",
@@ -352,7 +356,8 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
     final jobNumber = jobData['jobNumber'] ?? 'N/A';
     final workerName = jobData['worker_name'] ?? 'No worker assigned';
     final customerName = jobData['customer_name'] ?? 'No customer assigned';
-    final workerLocation = jobData['worker_location'] ?? 'Location not specified';
+    final workerLocation =
+        jobData['worker_location'] ?? 'Location not specified';
     final requiredDate = jobData['required_date'] != null
         ? (jobData['required_date'] as Timestamp).toDate()
         : null;
@@ -453,19 +458,16 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
                       _isWorkerView ? customerName : workerName,
                     ),
                     const SizedBox(height: 8),
-                    if (!_isWorkerView) _buildInfoRow(
-                        Icons.location_on,
-                        'Worker Location',
-                        workerLocation
-                    ),
+                    if (!_isWorkerView)
+                      _buildInfoRow(
+                          Icons.location_on, 'Worker Location', workerLocation),
                     if (!_isWorkerView) const SizedBox(height: 8),
                     _buildInfoRow(
                         Icons.calendar_today,
                         'Required Date',
                         requiredDate != null
                             ? '${requiredDate.day}/${requiredDate.month}/${requiredDate.year}'
-                            : 'Not specified'
-                    ),
+                            : 'Not specified'),
                     const SizedBox(height: 8),
                     _buildInfoRow(Icons.description, 'Details', details),
                     const SizedBox(height: 16),
@@ -474,14 +476,14 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
                         'CANCEL JOB',
                         Icons.cancel,
                         Colors.red,
-                            () => _showCancelConfirmation(jobId),
+                        () => _showCancelConfirmation(jobId),
                       ),
                     if (_isWorkerView && jobStatus.toLowerCase() == 'accepted')
                       _buildActionButton(
                         'MARK COMPLETE',
                         Icons.check_circle,
                         const Color(0xff0060D0),
-                            () => _showCompleteConfirmation(jobId),
+                        () => _showCompleteConfirmation(jobId),
                       ),
                   ],
                 ),
@@ -547,14 +549,14 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 20, color: Colors.white), // Set icon color to white
+            Icon(icon, size: 20, color: Colors.white),
             const SizedBox(width: 8),
             Text(
               text,
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.white, // Set text color to white
+                color: Colors.white,
               ),
             ),
           ],
@@ -562,7 +564,6 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
       ),
     );
   }
-
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
@@ -858,7 +859,8 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
                           borderRadius: BorderRadius.circular(30),
                           onTap: () {
                             setState(() {
-                              _searchQuery = _searchController.text.toLowerCase();
+                              _searchQuery =
+                                  _searchController.text.toLowerCase();
                             });
                           },
                           child: Center(
@@ -866,14 +868,15 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
                               duration: const Duration(milliseconds: 300),
                               child: _searchQuery.isNotEmpty
                                   ? Text(
-                                'SEARCH',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              )
-                                  : const Icon(Icons.search, color: Colors.white),
+                                      'SEARCH',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    )
+                                  : const Icon(Icons.search,
+                                      color: Colors.white),
                             ),
                           ),
                         ),
@@ -892,30 +895,30 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
                 scrollDirection: Axis.horizontal,
                 children: ['All', 'Pending', 'Accepted']
                     .map((filter) => Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: ChoiceChip(
-                    label: Text(
-                      filter,
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w500,
-                        color: _selectedFilter == filter
-                            ? Colors.white
-                            : const Color(0xff0060D0),
-                      ),
-                    ),
-                    selected: _selectedFilter == filter,
-                    selectedColor: const Color(0xff0060D0),
-                    backgroundColor: Colors.white,
-                    shape: const StadiumBorder(
-                      side: BorderSide(color: Color(0xff0060D0)),
-                    ),
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedFilter = selected ? filter : 'All';
-                      });
-                    },
-                  ),
-                ))
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: ChoiceChip(
+                            label: Text(
+                              filter,
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w500,
+                                color: _selectedFilter == filter
+                                    ? Colors.white
+                                    : const Color(0xff0060D0),
+                              ),
+                            ),
+                            selected: _selectedFilter == filter,
+                            selectedColor: const Color(0xff0060D0),
+                            backgroundColor: Colors.white,
+                            shape: const StadiumBorder(
+                              side: BorderSide(color: Color(0xff0060D0)),
+                            ),
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedFilter = selected ? filter : 'All';
+                              });
+                            },
+                          ),
+                        ))
                     .toList(),
               ),
             ),
@@ -930,7 +933,8 @@ class _OngoingJobsPageState extends State<OngoingJobsPage> with SingleTickerProv
               child: FutureBuilder<List<Map<String, dynamic>>>(
                 future: _fetchJobs(),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting && !_isRefreshing) {
+                  if (snapshot.connectionState == ConnectionState.waiting &&
+                      !_isRefreshing) {
                     return _buildShimmerLoading();
                   }
 

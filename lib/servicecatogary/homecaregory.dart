@@ -10,7 +10,8 @@ class WorkerListScreen extends StatefulWidget {
   _WorkerListScreenState createState() => _WorkerListScreenState();
 }
 
-class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerProviderStateMixin {
+class _WorkerListScreenState extends State<WorkerListScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   late AnimationController _animationController;
@@ -84,9 +85,9 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
                   MaterialPageRoute(
                     builder: (context) => BookingPage(
                       userId: worker['userId'] ?? '',
-                      name: worker['name'] ?? 'Service Provider',
+                      name: worker['name'] ?? 'Gardner',
                       //rating: worker['rating']?.toString() ?? '0.0',
-                      age: worker['age'] ?? '',
+                      age: worker['age']?.toString() ?? '',
                       location: worker['location'] ?? 'Unknown Location',
                     ),
                   ),
@@ -97,30 +98,27 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            worker['name'] ?? 'Service Provider',
-                            style: GoogleFonts.poppins(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      worker['name'] ?? 'Gardner',
+                      style: GoogleFonts.poppins(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 16),
-                    _buildInfoRow(Icons.work, 'Service', worker['jobTitle'] ?? 'Home Service'),
-                    _buildInfoRow(Icons.person, 'Age', worker['age'] ?? 'Not specified'),
-                    _buildInfoRow(Icons.location_city, 'Location', worker['location'] ?? 'Not specified'),
+                    _buildInfoRow(Icons.grass, 'Service',
+                        worker['jobTitle'] ?? 'Gardening Service'),
+                    _buildInfoRow(Icons.person, 'Age',
+                        worker['age']?.toString() ?? 'Not specified'),
+                    _buildInfoRow(Icons.location_on, 'Location',
+                        worker['location'] ?? 'Not specified'),
                     const SizedBox(height: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         color: Colors.grey.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(12),
@@ -140,7 +138,9 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
                             ),
                           ),
                           Text(
-                            worker['rate'] != null ? '\$${worker['rate']}/h' : 'Not specified',
+                            worker['rate'] != null
+                                ? 'LKR ${worker['rate']}/h'
+                                : 'Not specified',
                             style: GoogleFonts.poppins(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
@@ -203,16 +203,13 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.light,
         title: Text(
-          'Home Services',
+          'Gardening Services',
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
           ),
         ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black), // Changed back icon to black
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, size: 28),
@@ -246,7 +243,7 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
                           controller: _searchController,
                           style: GoogleFonts.poppins(fontSize: 16),
                           decoration: InputDecoration(
-                            hintText: "Search home services...",
+                            hintText: "Search gardening services...",
                             hintStyle: GoogleFonts.poppins(color: Colors.grey),
                             border: InputBorder.none,
                           ),
@@ -278,7 +275,8 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
                           borderRadius: BorderRadius.circular(30),
                           onTap: () {
                             setState(() {
-                              _searchQuery = _searchController.text.toLowerCase();
+                              _searchQuery =
+                                  _searchController.text.toLowerCase();
                             });
                           },
                           child: Center(
@@ -286,14 +284,15 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
                               duration: const Duration(milliseconds: 300),
                               child: _searchQuery.isNotEmpty
                                   ? Text(
-                                'SEARCH',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              )
-                                  : const Icon(Icons.search, color: Colors.white),
+                                      'SEARCH',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    )
+                                  : const Icon(Icons.search,
+                                      color: Colors.white),
                             ),
                           ),
                         ),
@@ -308,7 +307,7 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('workerregister')
-                  .where('jobTitle', isEqualTo: 'Home')
+                  .where('jobTitle', isEqualTo: 'Gardening')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -321,12 +320,13 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
                           height: 60,
                           child: CircularProgressIndicator(
                             strokeWidth: 6,
-                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xff0060D0)),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xff0060D0)),
                           ),
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          'Loading Home Services',
+                          'Loading Gardening Services',
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
@@ -352,7 +352,7 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              "Error loading home services",
+                              "Error loading gardening services",
                               style: GoogleFonts.poppins(
                                 color: Colors.red[800],
                                 fontWeight: FontWeight.w500,
@@ -370,13 +370,13 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.home_outlined,
+                          Icons.grass_outlined,
                           size: 80,
                           color: Colors.grey[300],
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          'No home services available',
+                          'No gardeners available',
                           style: GoogleFonts.poppins(
                             fontSize: 20,
                             fontWeight: FontWeight.w500,
@@ -400,7 +400,8 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
                 var filteredWorkers = workers.where((doc) {
                   var data = doc.data() as Map<String, dynamic>;
                   final name = data['name']?.toString().toLowerCase() ?? '';
-                  final location = data['location']?.toString().toLowerCase() ?? '';
+                  final location =
+                      data['location']?.toString().toLowerCase() ?? '';
                   return name.contains(_searchQuery) ||
                       location.contains(_searchQuery);
                 }).toList();
@@ -409,7 +410,8 @@ class _WorkerListScreenState extends State<WorkerListScreen> with SingleTickerPr
                   physics: const BouncingScrollPhysics(),
                   itemCount: filteredWorkers.length,
                   itemBuilder: (context, index) {
-                    var worker = filteredWorkers[index].data() as Map<String, dynamic>;
+                    var worker =
+                        filteredWorkers[index].data() as Map<String, dynamic>;
                     return _buildWorkerCard(worker, index);
                   },
                 );

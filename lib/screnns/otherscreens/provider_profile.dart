@@ -218,13 +218,11 @@ class _WorkerProfileState extends State<WorkerProfile> {
                 future: _getCustomerName(customerId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return _buildInfoRow(Icons.person, 'Customer', 'Loading...');
+                    return _buildInfoRow(
+                        Icons.person, 'Customer', 'Loading...');
                   }
-                  return _buildInfoRow(
-                      Icons.person,
-                      'Customer',
-                      snapshot.data ?? 'Unknown Customer'
-                  );
+                  return _buildInfoRow(Icons.person, 'Customer',
+                      snapshot.data ?? 'Unknown Customer');
                 },
               ),
               const SizedBox(height: 8),
@@ -233,8 +231,7 @@ class _WorkerProfileState extends State<WorkerProfile> {
                   'Required Date',
                   requiredDate != null
                       ? DateFormat('dd/MM/yyyy').format(requiredDate)
-                      : 'Not specified'
-              ),
+                      : 'Not specified'),
               const SizedBox(height: 8),
               _buildInfoRow(Icons.description, 'Details', text),
               const SizedBox(height: 16),
@@ -351,7 +348,8 @@ class _WorkerProfileState extends State<WorkerProfile> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                       ),
                       child: Text(
                         "YES",
@@ -433,7 +431,8 @@ class _WorkerProfileState extends State<WorkerProfile> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                       ),
                       child: Text(
                         "YES",
@@ -588,7 +587,8 @@ class _WorkerProfileState extends State<WorkerProfile> {
       body: StreamBuilder<DocumentSnapshot>(
         stream: _userStream,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting || _isLoading) {
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              _isLoading) {
             return _buildShimmerLoading();
           }
           if (!snapshot.hasData || !snapshot.data!.exists) {
@@ -655,10 +655,12 @@ class _WorkerProfileState extends State<WorkerProfile> {
                       .where("status", isEqualTo: "pending")
                       .get(),
                   builder: (context, jobSnapshot) {
-                    if (jobSnapshot.connectionState == ConnectionState.waiting) {
+                    if (jobSnapshot.connectionState ==
+                        ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    if (!jobSnapshot.hasData || jobSnapshot.data!.docs.isEmpty) {
+                    if (!jobSnapshot.hasData ||
+                        jobSnapshot.data!.docs.isEmpty) {
                       return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -688,7 +690,8 @@ class _WorkerProfileState extends State<WorkerProfile> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: jobDocs.length,
                       itemBuilder: (context, index) {
-                        var jobData = jobDocs[index].data() as Map<String, dynamic>;
+                        var jobData =
+                            jobDocs[index].data() as Map<String, dynamic>;
                         jobData['id'] = jobDocs[index].id;
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16.0),

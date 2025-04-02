@@ -39,21 +39,10 @@ class _JobsPageState extends State<JobsPage> {
 
   Future<List<Map<String, dynamic>>> _fetchJobs() async {
     try {
-      Query query;
-
-      if (_isWorkerView) {
-        // Worker view - show completed and rejected jobs
-        query = _firestore
-            .collection('jobs')
-            .where('worker', isEqualTo: widget.userId)
-            .where('status', whereIn: ['completed', 'rejected']);
-      } else {
-        // Customer view - show completed and cancelled jobs
-        query = _firestore
-            .collection('jobs')
-            .where('customer', isEqualTo: widget.userId)
-            .where('status', whereIn: ['completed', 'cancelled', 'rejected']);
-      }
+      Query query = _firestore
+          .collection('jobs')
+          .where('worker', isEqualTo: widget.userId)
+          .where('status', isEqualTo: 'accepted');
 
       QuerySnapshot querySnapshot = await query.get();
 
@@ -67,6 +56,42 @@ class _JobsPageState extends State<JobsPage> {
     } catch (e) {
       print("Error fetching jobs: $e");
       return [];
+    }
+  }
+
+  Future<void> _markJobAsDone(String jobId) async {
+    try {
+      await _firestore.collection('jobs').doc(jobId).update({
+        'status': 'done',
+        'completedAt': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Job marked as done successfully!'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Refresh the jobs list
+      setState(() {
+        _isLoading = true;
+      });
+      await Future.delayed(const Duration(milliseconds: 500));
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error marking job as done: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -87,7 +112,8 @@ class _JobsPageState extends State<JobsPage> {
 
     if (_selectedFilter != 'All') {
       filtered = filtered.where((job) {
-        return job['status']?.toString().toLowerCase() == _selectedFilter.toLowerCase();
+        return job['status']?.toString().toLowerCase() ==
+            _selectedFilter.toLowerCase();
       }).toList();
     }
 
@@ -98,18 +124,13 @@ class _JobsPageState extends State<JobsPage> {
     final jobNumber = jobData['jobNumber'] ?? 'N/A';
     final workerName = jobData['worker_name'] ?? 'No worker assigned';
     final customerName = jobData['customer_name'] ?? 'No customer assigned';
-    final workerLocation = jobData['worker_location'] ?? 'Location not specified';
+    final workerLocation =
+        jobData['worker_location'] ?? 'Location not specified';
     final requiredDate = jobData['required_date'] != null
         ? (jobData['required_date'] as Timestamp).toDate()
         : null;
-    final completedDate = jobData['completedAt'] != null
-        ? (jobData['completedAt'] as Timestamp).toDate()
-        : null;
-    final cancelledDate = jobData['cancelledAt'] != null
-        ? (jobData['cancelledAt'] as Timestamp).toDate()
-        : null;
     final details = jobData['text'] ?? 'No details provided';
-    final jobStatus = jobData['status'] ?? 'completed';
+    final jobStatus = jobData['status'] ?? 'accepted';
     final jobId = jobData['id'];
 
     final statusColor = _getStatusColor(jobStatus);
@@ -189,17 +210,14 @@ class _JobsPageState extends State<JobsPage> {
                 ),
                 const SizedBox(height: 12),
                 _buildInfoRow(
-                  _isWorkerView ? Icons.person : Icons.work,
-                  _isWorkerView ? 'Customer' : 'Worker',
-                  _isWorkerView ? customerName : workerName,
+                  Icons.person,
+                  'Customer',
+                  customerName,
                 ),
                 const SizedBox(height: 8),
-                if (!_isWorkerView) _buildInfoRow(
-                    Icons.location_on,
-                    'Worker Location',
-                    workerLocation
-                ),
-                if (!_isWorkerView) const SizedBox(height: 8),
+                _buildInfoRow(
+                    Icons.location_on, 'Worker Location', workerLocation),
+                const SizedBox(height: 8),
                 _buildInfoRow(
                   Icons.calendar_today,
                   'Required Date',
@@ -208,26 +226,30 @@ class _JobsPageState extends State<JobsPage> {
                       : 'Not specified',
                 ),
                 const SizedBox(height: 8),
-                if (jobStatus == 'completed' && completedDate != null)
-                  _buildInfoRow(
-                    Icons.check_circle,
-                    'Completed On',
-                    DateFormat('dd/MM/yyyy').format(completedDate),
-                  ),
-                if (jobStatus == 'cancelled' && cancelledDate != null)
-                  _buildInfoRow(
-                    Icons.cancel,
-                    'Cancelled On',
-                    DateFormat('dd/MM/yyyy').format(cancelledDate),
-                  ),
-                if (jobStatus == 'rejected')
-                  _buildInfoRow(
-                    Icons.block,
-                    'Status',
-                    'Rejected by worker',
-                  ),
-                const SizedBox(height: 8),
                 _buildInfoRow(Icons.description, 'Details', details),
+                const SizedBox(height: 16),
+                if (jobStatus == 'accepted')
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _markJobAsDone(jobId),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        'JOB DONE',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -275,8 +297,10 @@ class _JobsPageState extends State<JobsPage> {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'completed':
+      case 'done':
         return Colors.green;
+      case 'accepted':
+        return Colors.blue;
       case 'cancelled':
       case 'rejected':
         return Colors.red;
@@ -287,8 +311,10 @@ class _JobsPageState extends State<JobsPage> {
 
   IconData _getStatusIcon(String status) {
     switch (status.toLowerCase()) {
-      case 'completed':
+      case 'done':
         return Icons.check_circle;
+      case 'accepted':
+        return Icons.thumb_up;
       case 'cancelled':
         return Icons.cancel;
       case 'rejected':
@@ -348,7 +374,7 @@ class _JobsPageState extends State<JobsPage> {
           ),
           const SizedBox(height: 20),
           Text(
-            'No job history found',
+            'No jobs found',
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.w500,
@@ -357,9 +383,7 @@ class _JobsPageState extends State<JobsPage> {
           ),
           const SizedBox(height: 10),
           Text(
-            _isWorkerView
-                ? 'You have no completed or rejected jobs'
-                : 'You have no completed or cancelled jobs',
+            'You have no accepted jobs at the moment',
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: Colors.black54,
@@ -418,7 +442,7 @@ class _JobsPageState extends State<JobsPage> {
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text(
-          'Job History',
+          'My Jobs',
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.w600,
@@ -442,24 +466,6 @@ class _JobsPageState extends State<JobsPage> {
                 });
               });
             },
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              setState(() {
-                _isWorkerView = value == 'worker';
-              });
-            },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: 'customer',
-                child: Text('Customer View'),
-              ),
-              const PopupMenuItem<String>(
-                value: 'worker',
-                child: Text('Worker View'),
-              ),
-            ],
-            icon: const Icon(Icons.switch_account),
           ),
         ],
       ),
@@ -512,7 +518,8 @@ class _JobsPageState extends State<JobsPage> {
                           borderRadius: BorderRadius.circular(30),
                           onTap: () {
                             setState(() {
-                              _searchQuery = _searchController.text.toLowerCase();
+                              _searchQuery =
+                                  _searchController.text.toLowerCase();
                             });
                           },
                           child: Center(
@@ -520,14 +527,15 @@ class _JobsPageState extends State<JobsPage> {
                               duration: const Duration(milliseconds: 300),
                               child: _searchQuery.isNotEmpty
                                   ? Text(
-                                'SEARCH',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              )
-                                  : const Icon(Icons.search, color: Colors.white),
+                                      'SEARCH',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    )
+                                  : const Icon(Icons.search,
+                                      color: Colors.white),
                             ),
                           ),
                         ),
@@ -538,50 +546,12 @@ class _JobsPageState extends State<JobsPage> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: SizedBox(
-              height: 50,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  'All',
-                  'Completed',
-                  if (!_isWorkerView) 'Cancelled',
-                  if (_isWorkerView) 'Rejected',
-                ].map((filter) => Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: ChoiceChip(
-                    label: Text(
-                      filter,
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w500,
-                        color: _selectedFilter == filter
-                            ? Colors.white
-                            : const Color(0xff0060D0),
-                      ),
-                    ),
-                    selected: _selectedFilter == filter,
-                    selectedColor: const Color(0xff0060D0),
-                    backgroundColor: Colors.white,
-                    shape: const StadiumBorder(
-                      side: BorderSide(color: Color(0xff0060D0)),
-                    ),
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedFilter = selected ? filter : 'All';
-                      });
-                    },
-                  ),
-                )).toList(),
-              ),
-            ),
-          ),
           Expanded(
             child: FutureBuilder<List<Map<String, dynamic>>>(
               future: _fetchJobs(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting || _isLoading) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    _isLoading) {
                   return _buildShimmerLoading();
                 }
 
