@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter/services.dart'; // For clipboard functionality
 
 class WorkerProfile extends StatefulWidget {
   @override
@@ -214,18 +215,47 @@ class _WorkerProfileState extends State<WorkerProfile> {
                 ],
               ),
               const SizedBox(height: 16),
-              FutureBuilder<String>(
-                future: _getCustomerName(customerId),
+              FutureBuilder<Map<String, dynamic>>(
+                future: _getCustomerDetails(customerId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return _buildInfoRow(
                         Icons.person, 'Customer', 'Loading...');
                   }
-                  return _buildInfoRow(Icons.person, 'Customer',
-                      snapshot.data ?? 'Unknown Customer');
+                  final customerData = snapshot.data ?? {};
+                  final customerName =
+                      customerData['name'] ?? 'Unknown Customer';
+                  final phoneNumber = customerData['phone'] ?? 'Not available';
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInfoRow(Icons.person, 'Customer', customerName),
+                      const SizedBox(height: 8),
+                      _buildInfoRow(Icons.phone, 'Phone', phoneNumber),
+                      const SizedBox(height: 8),
+                      if (phoneNumber != 'Not available')
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () =>
+                                _handleCallButtonPressed(phoneNumber),
+                            icon: const Icon(Icons.call),
+                            label: const Text('CALL CUSTOMER'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                    ],
+                  );
                 },
               ),
-              const SizedBox(height: 8),
               _buildInfoRow(
                   Icons.calendar_today,
                   'Required Date',
@@ -284,6 +314,88 @@ class _WorkerProfileState extends State<WorkerProfile> {
           ),
         ),
       ),
+    );
+  }
+
+  void _handleCallButtonPressed(String phoneNumber) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Customer Phone Number',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                phoneNumber,
+                style: GoogleFonts.poppins(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: phoneNumber));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Phone number copied to clipboard'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                    ),
+                    child: const Text('COPY'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      // You would typically use url_launcher here to make a call
+                      // For now, we'll just show a message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Calling $phoneNumber...'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                    ),
+                    child: const Text('CALL'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -709,8 +821,9 @@ class _WorkerProfileState extends State<WorkerProfile> {
     );
   }
 
-  Future<String> _getCustomerName(String userId) async {
+  Future<Map<String, dynamic>> _getCustomerDetails(String userId) async {
     try {
+      // First check in users collection
       QuerySnapshot customerSnapshot = await _firestore
           .collection("users")
           .where("userId", isEqualTo: userId)
@@ -719,9 +832,13 @@ class _WorkerProfileState extends State<WorkerProfile> {
 
       if (customerSnapshot.docs.isNotEmpty) {
         DocumentSnapshot customerDoc = customerSnapshot.docs.first;
-        return customerDoc["name"] ?? "Unknown Customer";
+        return {
+          'name': customerDoc["name"] ?? "Unknown Customer",
+          'phone': customerDoc["phone"] ?? "Not available"
+        };
       }
 
+      // If not found in users, check in workerregister collection
       QuerySnapshot workerSnapshot = await _firestore
           .collection("workerregister")
           .where("userId", isEqualTo: userId)
@@ -730,13 +847,16 @@ class _WorkerProfileState extends State<WorkerProfile> {
 
       if (workerSnapshot.docs.isNotEmpty) {
         DocumentSnapshot workerDoc = workerSnapshot.docs.first;
-        return workerDoc["name"] ?? "Unknown Customer";
+        return {
+          'name': workerDoc["name"] ?? "Unknown Customer",
+          'phone': workerDoc["phone"] ?? "Not available"
+        };
       }
 
-      return "Customer Not Found";
+      return {'name': 'Customer Not Found', 'phone': 'Not available'};
     } catch (e) {
-      print("Error fetching customer name: $e");
-      return "Error Loading Customer";
+      print("Error fetching customer details: $e");
+      return {'name': 'Error Loading Customer', 'phone': 'Not available'};
     }
   }
 }
