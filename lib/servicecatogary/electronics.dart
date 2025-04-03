@@ -309,7 +309,7 @@ class _ElectronicsListScreenState extends State<ElectronicsListScreen>
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('workerregister')
-                  .where('jobTitle', isEqualTo: 'Electronics Repair')
+                  .where('jobTitle', isEqualTo: 'Electronics')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

@@ -32,11 +32,11 @@ class _WorkRegState extends State<WorkReg> {
   bool _isLoading = true;
 
   final List<String> jobCategories = [
-    "Electronics Repair",
+    "Electronics",
     "Home",
-    "Auto Mechanic",
+    "Mechanic",
     "Electrician",
-    "Furniture Assembly",
+    "Furniture",
     "Plumbing",
     "Painting",
     "Gardening",

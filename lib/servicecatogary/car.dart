@@ -309,7 +309,7 @@ class _CarListScreenState extends State<CarListScreen>
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('workerregister')
-                  .where('jobTitle', isEqualTo: 'Car')
+                  .where('jobTitle', isEqualTo: 'Mechanic')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

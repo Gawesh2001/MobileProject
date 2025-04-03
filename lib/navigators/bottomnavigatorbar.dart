@@ -26,110 +26,115 @@ class _BottomNavigatorBarState extends State<BottomNavigatorBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-      child: Container(
-        height: 70,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 16,
+            spreadRadius: 0,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        child: Container(
+          height: 80,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              top: BorderSide(
+                color: Colors.grey.withOpacity(0.1),
+                width: 1,
+              ),
             ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.transparent,
-          selectedItemColor: const Color(0xff0060D0),
-          unselectedItemColor: Colors.grey[400],
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          elevation: 0,
-          iconSize: 26,
-          onTap: (index) {
-            setState(() => _selectedIndex = index);
-            if (index == 0) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const Home()),
-              );
-            } else if (index == 4) {
-              // Profile icon index
-              final userId = _auth.currentUser?.uid ?? '';
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfilePage(),
-
-                  // builder: (context) => ProfilePage(userId: userId),
-                ),
-              );
-            }
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Icon(Icons.home_outlined),
-              ),
-              activeIcon: Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Icon(Icons.home_filled),
-              ),
-              label: '',
+          ),
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white,
+            selectedItemColor: const Color(0xff0060D0),
+            unselectedItemColor: Colors.grey[500],
+            selectedLabelStyle: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              height: 1.5,
             ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Icon(Icons.favorite_outline),
-              ),
-              activeIcon: Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Icon(Icons.favorite),
-              ),
-              label: '',
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              height: 1.5,
             ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Icon(Icons.work_outline),
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+            elevation: 0,
+            iconSize: 26,
+            onTap: (index) {
+              setState(() => _selectedIndex = index);
+              if (index == 0) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Home()),
+                );
+              } else if (index == 4) {
+                final userId = _auth.currentUser?.uid ?? '';
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfilePage(),
+                  ),
+                );
+              }
+            },
+            items: [
+              _buildBottomNavItem(
+                icon: Icons.home_outlined,
+                activeIcon: Icons.home_filled,
+                label: 'Home',
               ),
-              activeIcon: Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Icon(Icons.work),
+              _buildBottomNavItem(
+                icon: Icons.favorite_outline,
+                activeIcon: Icons.favorite,
+                label: 'Saved',
               ),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Icon(Icons.calendar_today_outlined),
+              _buildBottomNavItem(
+                icon: Icons.work_outline,
+                activeIcon: Icons.work,
+                label: 'Jobs',
               ),
-              activeIcon: Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Icon(Icons.calendar_today),
+              _buildBottomNavItem(
+                icon: Icons.calendar_today_outlined,
+                activeIcon: Icons.calendar_today,
+                label: 'Calendar',
               ),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Icon(Icons.person_outline),
+              _buildBottomNavItem(
+                icon: Icons.person_outline,
+                activeIcon: Icons.person,
+                label: 'Profile',
               ),
-              activeIcon: Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Icon(Icons.person),
-              ),
-              label: '',
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  BottomNavigationBarItem _buildBottomNavItem({
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+  }) {
+    return BottomNavigationBarItem(
+      icon: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Icon(icon),
+      ),
+      activeIcon: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Icon(activeIcon),
+      ),
+      label: label,
     );
   }
 }
