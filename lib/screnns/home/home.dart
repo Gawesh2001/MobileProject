@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, unused_field
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -435,7 +435,7 @@ class _HomeState extends State<Home> {
     }
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 112, 111, 111),
+      backgroundColor: const Color.fromARGB(255, 248, 248, 248),
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Column(

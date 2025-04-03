@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
@@ -307,7 +309,7 @@ class _WorkerListScreenState extends State<WorkerListScreen>
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('workerregister')
-                  .where('jobTitle', isEqualTo: 'Gardening')
+                  .where('jobTitle', isEqualTo: 'Home')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

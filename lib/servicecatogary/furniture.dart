@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
@@ -109,12 +111,16 @@ class _FurnitureListScreenState extends State<FurnitureListScreen>
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 16),
-                    _buildInfoRow(Icons.construction, 'Service', worker['jobTitle'] ?? 'Furniture Service'),
-                    _buildInfoRow(Icons.person, 'Age', worker['age']?.toString() ?? 'Not specified'),
-                    _buildInfoRow(Icons.location_on, 'Location', worker['location'] ?? 'Not specified'),
+                    _buildInfoRow(Icons.construction, 'Service',
+                        worker['jobTitle'] ?? 'Furniture Service'),
+                    _buildInfoRow(Icons.person, 'Age',
+                        worker['age']?.toString() ?? 'Not specified'),
+                    _buildInfoRow(Icons.location_on, 'Location',
+                        worker['location'] ?? 'Not specified'),
                     const SizedBox(height: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         color: Colors.grey.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(12),
@@ -134,7 +140,9 @@ class _FurnitureListScreenState extends State<FurnitureListScreen>
                             ),
                           ),
                           Text(
-                            worker['rate'] != null ? 'LKR ${worker['rate']}/h' : 'Not specified',
+                            worker['rate'] != null
+                                ? 'LKR ${worker['rate']}/h'
+                                : 'Not specified',
                             style: GoogleFonts.poppins(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
@@ -269,7 +277,8 @@ class _FurnitureListScreenState extends State<FurnitureListScreen>
                           borderRadius: BorderRadius.circular(30),
                           onTap: () {
                             setState(() {
-                              _searchQuery = _searchController.text.toLowerCase();
+                              _searchQuery =
+                                  _searchController.text.toLowerCase();
                             });
                           },
                           child: Center(
@@ -277,14 +286,15 @@ class _FurnitureListScreenState extends State<FurnitureListScreen>
                               duration: const Duration(milliseconds: 300),
                               child: _searchQuery.isNotEmpty
                                   ? Text(
-                                'SEARCH',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              )
-                                  : const Icon(Icons.search, color: Colors.white),
+                                      'SEARCH',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    )
+                                  : const Icon(Icons.search,
+                                      color: Colors.white),
                             ),
                           ),
                         ),
@@ -312,7 +322,8 @@ class _FurnitureListScreenState extends State<FurnitureListScreen>
                           height: 60,
                           child: CircularProgressIndicator(
                             strokeWidth: 6,
-                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xff0060D0)),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xff0060D0)),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -391,7 +402,8 @@ class _FurnitureListScreenState extends State<FurnitureListScreen>
                 var filteredWorkers = workers.where((doc) {
                   var data = doc.data() as Map<String, dynamic>;
                   final name = data['name']?.toString().toLowerCase() ?? '';
-                  final location = data['location']?.toString().toLowerCase() ?? '';
+                  final location =
+                      data['location']?.toString().toLowerCase() ?? '';
                   return name.contains(_searchQuery) ||
                       location.contains(_searchQuery);
                 }).toList();
@@ -400,7 +412,8 @@ class _FurnitureListScreenState extends State<FurnitureListScreen>
                   physics: const BouncingScrollPhysics(),
                   itemCount: filteredWorkers.length,
                   itemBuilder: (context, index) {
-                    var worker = filteredWorkers[index].data() as Map<String, dynamic>;
+                    var worker =
+                        filteredWorkers[index].data() as Map<String, dynamic>;
                     return _buildWorkerCard(worker, index);
                   },
                 );

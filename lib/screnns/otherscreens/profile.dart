@@ -178,7 +178,7 @@ class ProfilePage extends StatelessWidget {
           backgroundColor: Colors.grey[50],
           appBar: AppBar(
             title: Text(
-              'Profile',
+              'Controller Page',
               style: GoogleFonts.poppins(
                 color: Colors.white,
                 fontSize: 20,
@@ -188,12 +188,7 @@ class ProfilePage extends StatelessWidget {
             backgroundColor: const Color(0xff0079C2),
             elevation: 0,
             centerTitle: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings, color: Colors.white),
-                onPressed: () {},
-              ),
-            ],
+            actions: [],
           ),
           body: SingleChildScrollView(
             child: Padding(

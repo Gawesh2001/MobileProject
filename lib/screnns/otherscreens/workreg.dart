@@ -33,7 +33,7 @@ class _WorkRegState extends State<WorkReg> {
 
   final List<String> jobCategories = [
     "Electronics Repair",
-    "Home Services",
+    "Home",
     "Auto Mechanic",
     "Electrician",
     "Furniture Assembly",

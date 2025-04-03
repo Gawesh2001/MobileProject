@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'package:flutter/material.dart';
 import 'package:gofinder/screnns/home/home.dart';
 import 'package:gofinder/screnns/otherscreens/profile.dart';
