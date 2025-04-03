@@ -16,10 +16,10 @@ class JobsPage extends StatefulWidget {
 class _JobsPageState extends State<JobsPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isLoading = false;
-  bool _isWorkerView = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   String _selectedFilter = 'All';
+  bool _isCustomer = false;
 
   @override
   void initState() {
@@ -29,20 +29,43 @@ class _JobsPageState extends State<JobsPage> {
         _searchQuery = _searchController.text.toLowerCase();
       });
     });
+    _checkUserRole();
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  Future<void> _checkUserRole() async {
+    // Check if the user is a customer by seeing if their ID exists in any job's customer field
+    try {
+      final customerQuery = await _firestore
+          .collection('jobs')
+          .where('customer', isEqualTo: widget.userId)
+          .limit(1)
+          .get();
+
+      setState(() {
+        _isCustomer = customerQuery.docs.isNotEmpty;
+      });
+    } catch (e) {
+      print("Error checking user role: $e");
+    }
   }
 
   Future<List<Map<String, dynamic>>> _fetchJobs() async {
     try {
-      Query query = _firestore
-          .collection('jobs')
-          .where('worker', isEqualTo: widget.userId)
-          .where('status', isEqualTo: 'accepted');
+      Query query;
+
+      if (_isCustomer) {
+        // For customers, fetch jobs where they are the customer and status is 'complete'
+        query = _firestore
+            .collection('jobs')
+            .where('customer', isEqualTo: widget.userId)
+            .where('status', isEqualTo: 'complete');
+      } else {
+        // For workers, fetch jobs where they are the worker and status is 'accepted'
+        query = _firestore
+            .collection('jobs')
+            .where('worker', isEqualTo: widget.userId)
+            .where('status', isEqualTo: 'accepted');
+      }
 
       QuerySnapshot querySnapshot = await query.get();
 
@@ -59,16 +82,16 @@ class _JobsPageState extends State<JobsPage> {
     }
   }
 
-  Future<void> _markJobAsDone(String jobId) async {
+  Future<void> _updateJobStatus(String jobId, String status) async {
     try {
       await _firestore.collection('jobs').doc(jobId).update({
-        'status': 'done',
-        'completedAt': FieldValue.serverTimestamp(),
+        'status': status,
+        if (status == 'completed') 'completedAt': FieldValue.serverTimestamp(),
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Job marked as done successfully!'),
+          content: Text('Job status updated to $status successfully!'),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -88,7 +111,7 @@ class _JobsPageState extends State<JobsPage> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error marking job as done: ${e.toString()}'),
+          content: Text('Error updating job status: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -228,13 +251,35 @@ class _JobsPageState extends State<JobsPage> {
                 const SizedBox(height: 8),
                 _buildInfoRow(Icons.description, 'Details', details),
                 const SizedBox(height: 16),
-                if (jobStatus == 'accepted')
+                if (_isCustomer && jobStatus == 'complete')
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () => _markJobAsDone(jobId),
+                      onPressed: () => _updateJobStatus(jobId, 'completed'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        'CONFIRM COMPLETION',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (!_isCustomer && jobStatus == 'accepted')
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _updateJobStatus(jobId, 'complete'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -297,8 +342,10 @@ class _JobsPageState extends State<JobsPage> {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'done':
+      case 'completed':
         return Colors.green;
+      case 'complete':
+        return Colors.orange;
       case 'accepted':
         return Colors.blue;
       case 'cancelled':
@@ -311,8 +358,10 @@ class _JobsPageState extends State<JobsPage> {
 
   IconData _getStatusIcon(String status) {
     switch (status.toLowerCase()) {
-      case 'done':
+      case 'completed':
         return Icons.check_circle;
+      case 'complete':
+        return Icons.hourglass_bottom;
       case 'accepted':
         return Icons.thumb_up;
       case 'cancelled':
@@ -374,7 +423,9 @@ class _JobsPageState extends State<JobsPage> {
           ),
           const SizedBox(height: 20),
           Text(
-            'No jobs found',
+            _isCustomer
+                ? 'No jobs awaiting your confirmation'
+                : 'No accepted jobs at the moment',
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.w500,
@@ -383,7 +434,9 @@ class _JobsPageState extends State<JobsPage> {
           ),
           const SizedBox(height: 10),
           Text(
-            'You have no accepted jobs at the moment',
+            _isCustomer
+                ? 'You have no completed jobs waiting for confirmation'
+                : 'You have no jobs assigned to you currently',
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: Colors.black54,
@@ -442,7 +495,7 @@ class _JobsPageState extends State<JobsPage> {
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text(
-          'My Jobs',
+          _isCustomer ? 'Jobs Awaiting Confirmation' : 'My Jobs',
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.w600,

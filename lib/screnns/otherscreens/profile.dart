@@ -305,6 +305,24 @@ class ProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
+                  _buildSectionCard(
+                    child: _buildListTile(
+                      icon: Icons.history,
+                      iconColor: Colors.green,
+                      title: "Job History",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OngoingJobsPage(
+                              userId: user?.uid ?? '',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   // On Going Jobs Button
                   _buildSectionCard(
                     child: _buildListTile(
