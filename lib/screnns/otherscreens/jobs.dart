@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
-import 'job_history.dart'; // Added import for history page
+import 'job_history.dart';
 
 class JobsPage extends StatefulWidget {
   final String userId;
@@ -592,15 +592,15 @@ class _JobsPageState extends State<JobsPage> {
                               duration: const Duration(milliseconds: 300),
                               child: _searchQuery.isNotEmpty
                                   ? Text(
-                                'SEARCH',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              )
+                                      'SEARCH',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    )
                                   : const Icon(Icons.search,
-                                  color: Colors.white),
+                                      color: Colors.white),
                             ),
                           ),
                         ),

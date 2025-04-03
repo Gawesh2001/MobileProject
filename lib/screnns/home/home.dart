@@ -243,8 +243,7 @@ class _HomeState extends State<Home> {
           ),
           elevation: 4,
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start, // Keep text left-aligned
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -278,8 +277,7 @@ class _HomeState extends State<Home> {
                         left: 15,
                         right: 15,
                         child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start, // ✅ Left-align text
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               service['title'],
@@ -309,9 +307,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               Expanded(
-                // ✅ Makes the button section flexible
                 child: Center(
-                  // ✅ Ensures button is centered vertically
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: SizedBox(
@@ -439,7 +435,7 @@ class _HomeState extends State<Home> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 112, 111, 111),
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Column(
@@ -463,7 +459,7 @@ class _HomeState extends State<Home> {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: const Color.fromARGB(255, 66, 66, 66),
+                color: const Color.fromARGB(255, 15, 15, 15),
               ),
             ),
           ],
@@ -532,7 +528,7 @@ class _HomeState extends State<Home> {
                 style: GoogleFonts.poppins(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: const Color.fromARGB(221, 255, 255, 255),
+                  color: const Color.fromARGB(221, 44, 44, 44),
                 ),
               ),
             ),
@@ -540,7 +536,7 @@ class _HomeState extends State<Home> {
 
             // Featured Services Carousel
             SizedBox(
-              height: 280, // Reduced height
+              height: 280,
               child: PageView.builder(
                 controller: _featuredController,
                 scrollDirection: Axis.horizontal,
@@ -580,7 +576,7 @@ class _HomeState extends State<Home> {
                 style: GoogleFonts.poppins(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: const Color.fromARGB(221, 255, 255, 255),
+                  color: const Color.fromARGB(221, 48, 47, 47),
                 ),
               ),
             ),

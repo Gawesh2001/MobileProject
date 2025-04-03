@@ -3,7 +3,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../services/auth.dart';
-import 'register.dart'; // Import the Register page
+import 'register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gofinder/screnns/home/home.dart';
 
@@ -19,7 +19,7 @@ class _Sign_InState extends State<Sign_In> {
 
   String email = '';
   String password = '';
-  bool _passwordVisible = false; // Manage visibility of password
+  bool _passwordVisible = false;
 
   @override
   void initState() {
@@ -67,7 +67,6 @@ class _Sign_InState extends State<Sign_In> {
       await prefs.remove('password');
     }
 
-    // Call your sign-in function here
     dynamic result = await _auth.signInWithEmailAndPassword(email, password);
 
     if (result == null) {

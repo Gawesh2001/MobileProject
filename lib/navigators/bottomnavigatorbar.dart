@@ -63,12 +63,11 @@ class _BottomNavigatorBarState extends State<BottomNavigatorBar> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ProfilePage(),
-                  // If your ProfilePage constructor requires userId, pass it like this:
+
                   // builder: (context) => ProfilePage(userId: userId),
                 ),
               );
             }
-            // Other buttons intentionally left non-functional
           },
           items: const [
             BottomNavigationBarItem(

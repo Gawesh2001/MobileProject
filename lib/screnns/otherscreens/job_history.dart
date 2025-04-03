@@ -16,7 +16,7 @@ class JobHistoryPage extends StatefulWidget {
 class _JobsHistoryState extends State<JobHistoryPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isLoading = false;
-  bool _isWorkerView = true; // Changed to default to worker view
+  bool _isWorkerView = true;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   String _selectedFilter = 'All';
@@ -87,7 +87,8 @@ class _JobsHistoryState extends State<JobHistoryPage> {
 
     if (_selectedFilter != 'All') {
       filtered = filtered.where((job) {
-        return job['status']?.toString().toLowerCase() == _selectedFilter.toLowerCase();
+        return job['status']?.toString().toLowerCase() ==
+            _selectedFilter.toLowerCase();
       }).toList();
     }
 
@@ -98,7 +99,8 @@ class _JobsHistoryState extends State<JobHistoryPage> {
     final jobNumber = jobData['jobNumber'] ?? 'N/A';
     final workerName = jobData['worker_name'] ?? 'No worker assigned';
     final customerName = jobData['customer_name'] ?? 'No customer assigned';
-    final workerLocation = jobData['worker_location'] ?? 'Location not specified';
+    final workerLocation =
+        jobData['worker_location'] ?? 'Location not specified';
     final requiredDate = jobData['required_date'] != null
         ? (jobData['required_date'] as Timestamp).toDate()
         : null;
@@ -194,11 +196,9 @@ class _JobsHistoryState extends State<JobHistoryPage> {
                   _isWorkerView ? customerName : workerName,
                 ),
                 const SizedBox(height: 8),
-                if (!_isWorkerView) _buildInfoRow(
-                    Icons.location_on,
-                    'Worker Location',
-                    workerLocation
-                ),
+                if (!_isWorkerView)
+                  _buildInfoRow(
+                      Icons.location_on, 'Worker Location', workerLocation),
                 if (!_isWorkerView) const SizedBox(height: 8),
                 _buildInfoRow(
                   Icons.calendar_today,
@@ -512,7 +512,8 @@ class _JobsHistoryState extends State<JobHistoryPage> {
                           borderRadius: BorderRadius.circular(30),
                           onTap: () {
                             setState(() {
-                              _searchQuery = _searchController.text.toLowerCase();
+                              _searchQuery =
+                                  _searchController.text.toLowerCase();
                             });
                           },
                           child: Center(
@@ -520,14 +521,15 @@ class _JobsHistoryState extends State<JobHistoryPage> {
                               duration: const Duration(milliseconds: 300),
                               child: _searchQuery.isNotEmpty
                                   ? Text(
-                                'SEARCH',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              )
-                                  : const Icon(Icons.search, color: Colors.white),
+                                      'SEARCH',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    )
+                                  : const Icon(Icons.search,
+                                      color: Colors.white),
                             ),
                           ),
                         ),
@@ -549,31 +551,33 @@ class _JobsHistoryState extends State<JobHistoryPage> {
                   'Completed',
                   if (!_isWorkerView) 'Cancelled',
                   if (_isWorkerView) 'Rejected',
-                ].map((filter) => Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: ChoiceChip(
-                    label: Text(
-                      filter,
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w500,
-                        color: _selectedFilter == filter
-                            ? Colors.white
-                            : const Color(0xff0060D0),
-                      ),
-                    ),
-                    selected: _selectedFilter == filter,
-                    selectedColor: const Color(0xff0060D0),
-                    backgroundColor: Colors.white,
-                    shape: const StadiumBorder(
-                      side: BorderSide(color: Color(0xff0060D0)),
-                    ),
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedFilter = selected ? filter : 'All';
-                      });
-                    },
-                  ),
-                )).toList(),
+                ]
+                    .map((filter) => Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: ChoiceChip(
+                            label: Text(
+                              filter,
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w500,
+                                color: _selectedFilter == filter
+                                    ? Colors.white
+                                    : const Color(0xff0060D0),
+                              ),
+                            ),
+                            selected: _selectedFilter == filter,
+                            selectedColor: const Color(0xff0060D0),
+                            backgroundColor: Colors.white,
+                            shape: const StadiumBorder(
+                              side: BorderSide(color: Color(0xff0060D0)),
+                            ),
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedFilter = selected ? filter : 'All';
+                              });
+                            },
+                          ),
+                        ))
+                    .toList(),
               ),
             ),
           ),
@@ -581,7 +585,8 @@ class _JobsHistoryState extends State<JobHistoryPage> {
             child: FutureBuilder<List<Map<String, dynamic>>>(
               future: _fetchJobs(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting || _isLoading) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    _isLoading) {
                   return _buildShimmerLoading();
                 }
 

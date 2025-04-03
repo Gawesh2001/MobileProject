@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gofinder/models/user_model.dart';
 import 'package:gofinder/screnns/authentication/sign_in.dart';
 import 'package:gofinder/services/auth.dart';
-import 'package:gofinder/screnns/authentication/sign_in.dart'; // Ensure correct import for Sign In page
+import 'package:gofinder/screnns/authentication/sign_in.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -18,7 +18,8 @@ class _RegisterState extends State<Register> {
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   bool _agreeToTerms = false;
   String errorMessage = "";
@@ -56,18 +57,20 @@ class _RegisterState extends State<Register> {
 
     AuthServices authServices = AuthServices();
     try {
-      UserModel? userModel = await authServices.registerWithEmailAndPassword(email, password, userName);
+      UserModel? userModel = await authServices.registerWithEmailAndPassword(
+          email, password, userName);
 
       if (userModel != null) {
-        // **🔥 Store User Data in Firestore**
-        await FirebaseFirestore.instance.collection("users").doc(userModel.uid).set({
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(userModel.uid)
+            .set({
           "userName": userName,
           "email": email,
-          "role": _selectedRole, // Save the selected role
+          "role": _selectedRole,
           "createdAt": FieldValue.serverTimestamp(),
         });
 
-        // **✅ Navigate to Sign In Page**
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const Sign_In()),
@@ -113,7 +116,8 @@ class _RegisterState extends State<Register> {
               height: 250,
               decoration: const BoxDecoration(
                 color: Color(0xff0060D0),
-                borderRadius: BorderRadius.only(bottomRight: Radius.circular(75)),
+                borderRadius:
+                    BorderRadius.only(bottomRight: Radius.circular(75)),
               ),
               child: Padding(
                 padding: const EdgeInsets.only(top: 20.0),
@@ -132,8 +136,16 @@ class _RegisterState extends State<Register> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           SizedBox(width: 48),
-                          Text("Create ", style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold, color: Colors.white)),
-                          Text("Account", style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold, color: Colors.white)),
+                          Text("Create ",
+                              style: TextStyle(
+                                  fontSize: 35,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                          Text("Account",
+                              style: TextStyle(
+                                  fontSize: 35,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
                         ],
                       ),
                     ),
@@ -152,10 +164,12 @@ class _RegisterState extends State<Register> {
                   _buildTextField(emailController, "Email"),
                   const SizedBox(height: 20),
                   _buildTextField(passwordController, "Password",
-                      obscureText: _obscurePassword, icon: () => _togglePasswordVisibility(false)),
+                      obscureText: _obscurePassword,
+                      icon: () => _togglePasswordVisibility(false)),
                   const SizedBox(height: 20),
                   _buildTextField(confirmPasswordController, "Confirm Password",
-                      obscureText: _obscureConfirmPassword, icon: () => _togglePasswordVisibility(true)),
+                      obscureText: _obscureConfirmPassword,
+                      icon: () => _togglePasswordVisibility(true)),
                   const SizedBox(height: 20),
 
                   // Role Selection Dropdown
@@ -167,11 +181,13 @@ class _RegisterState extends State<Register> {
                       });
                     },
                     items: ["worker", "customer"]
-                        .map((role) => DropdownMenuItem(value: role, child: Text(role)))
+                        .map((role) =>
+                            DropdownMenuItem(value: role, child: Text(role)))
                         .toList(),
                     decoration: InputDecoration(
                       labelText: "Select Role",
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8)),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -188,20 +204,20 @@ class _RegisterState extends State<Register> {
                         },
                         activeColor: Colors.orange,
                       ),
-                      const Text("Agree to ", style: TextStyle(color: Colors.black)),
+                      const Text("Agree to ",
+                          style: TextStyle(color: Colors.black)),
                       GestureDetector(
-                        onTap: () {
-                          // TODO: Implement Terms & Conditions Page
-                        },
-                        child: const Text("Terms and Conditions", style: TextStyle(color: Colors.blue)),
+                        onTap: () {},
+                        child: const Text("Terms and Conditions",
+                            style: TextStyle(color: Colors.blue)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
 
-                  // Display Error Message
                   if (errorMessage.isNotEmpty)
-                    Text(errorMessage, style: const TextStyle(color: Colors.red)),
+                    Text(errorMessage,
+                        style: const TextStyle(color: Colors.red)),
 
                   const SizedBox(height: 20),
                   Center(
@@ -211,10 +227,13 @@ class _RegisterState extends State<Register> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xff0079C2),
                           padding: const EdgeInsets.symmetric(vertical: 10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                         onPressed: _register,
-                        child: const Text("Register", style: TextStyle(fontSize: 18, color: Colors.white)),
+                        child: const Text("Register",
+                            style:
+                                TextStyle(fontSize: 18, color: Colors.white)),
                       ),
                     ),
                   ),
@@ -225,15 +244,19 @@ class _RegisterState extends State<Register> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text("Already have an account? ", style: TextStyle(fontSize: 14, color: Colors.grey)),
+                        const Text("Already have an account? ",
+                            style: TextStyle(fontSize: 14, color: Colors.grey)),
                         GestureDetector(
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const Sign_In()),
+                              MaterialPageRoute(
+                                  builder: (context) => const Sign_In()),
                             );
                           },
-                          child: const Text("Sign In", style: TextStyle(fontSize: 14, color: Colors.blue)),
+                          child: const Text("Sign In",
+                              style:
+                                  TextStyle(fontSize: 14, color: Colors.blue)),
                         ),
                       ],
                     ),
@@ -247,14 +270,20 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, {bool obscureText = false, Function()? icon}) {
+  Widget _buildTextField(TextEditingController controller, String label,
+      {bool obscureText = false, Function()? icon}) {
     return TextField(
       controller: controller,
       obscureText: obscureText,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        suffixIcon: icon != null ? IconButton(icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off), onPressed: icon) : null,
+        suffixIcon: icon != null
+            ? IconButton(
+                icon:
+                    Icon(obscureText ? Icons.visibility : Icons.visibility_off),
+                onPressed: icon)
+            : null,
       ),
     );
   }

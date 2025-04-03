@@ -23,7 +23,8 @@ class BookingPage extends StatefulWidget {
   _BookingPageState createState() => _BookingPageState();
 }
 
-class _BookingPageState extends State<BookingPage> with SingleTickerProviderStateMixin {
+class _BookingPageState extends State<BookingPage>
+    with SingleTickerProviderStateMixin {
   late TextEditingController _textController;
   DateTime? _selectedDate;
   bool _isLoading = false;
@@ -149,11 +150,14 @@ class _BookingPageState extends State<BookingPage> with SingleTickerProviderStat
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildInfoRow(Icons.person_outline, 'Service Provider', widget.name),
+                    _buildInfoRow(
+                        Icons.person_outline, 'Service Provider', widget.name),
                     _buildInfoRow(Icons.calendar_today, 'Date', formattedDate),
-                    _buildInfoRow(Icons.location_on_outlined, 'Location', widget.location),
+                    _buildInfoRow(Icons.location_on_outlined, 'Location',
+                        widget.location),
                     if (_textController.text.isNotEmpty)
-                      _buildInfoRow(Icons.description_outlined, 'Details', _textController.text),
+                      _buildInfoRow(Icons.description_outlined, 'Details',
+                          _textController.text),
                     const SizedBox(height: 16),
                     const Divider(),
                     const SizedBox(height: 16),
@@ -199,24 +203,26 @@ class _BookingPageState extends State<BookingPage> with SingleTickerProviderStat
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
                           ),
                           child: _isSubmitting
                               ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: const AlwaysStoppedAnimation(Colors.white),
-                            ),
-                          )
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: const AlwaysStoppedAnimation(
+                                        Colors.white),
+                                  ),
+                                )
                               : Text(
-                            "CONFIRM",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                                  "CONFIRM",
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
                       ],
                     ),
@@ -409,7 +415,7 @@ class _BookingPageState extends State<BookingPage> with SingleTickerProviderStat
           backgroundColor: Colors.white,
           iconTheme: const IconThemeData(
             color: Colors.black,
-            size: 24, // Set icon size to 24
+            size: 24,
           ),
           titleSpacing: 0,
           title: Text(
@@ -434,7 +440,7 @@ class _BookingPageState extends State<BookingPage> with SingleTickerProviderStat
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(
           color: Colors.black,
-          size: 24, // Set icon size to 24
+          size: 24,
         ),
         titleSpacing: 0,
         title: Text(
@@ -481,9 +487,11 @@ class _BookingPageState extends State<BookingPage> with SingleTickerProviderStat
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        _buildDetailChip(Icons.person_outline, '${widget.age} years'),
+                        _buildDetailChip(
+                            Icons.person_outline, '${widget.age} years'),
                         const SizedBox(width: 12),
-                        _buildDetailChip(Icons.location_on_outlined, widget.location),
+                        _buildDetailChip(
+                            Icons.location_on_outlined, widget.location),
                       ],
                     ),
                   ],
@@ -602,22 +610,22 @@ class _BookingPageState extends State<BookingPage> with SingleTickerProviderStat
                 ),
                 child: _isSubmitting
                     ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation(Colors.white),
-                  ),
-                )
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(Colors.white),
+                        ),
+                      )
                     : Text(
-                  'Book Now',
-                  style: GoogleFonts.poppins(
-                    fontSize: 17,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+                        'Book Now',
+                        style: GoogleFonts.poppins(
+                          fontSize: 17,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
               ),
             ),
           ],

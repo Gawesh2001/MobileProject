@@ -173,12 +173,10 @@ class _WorkRegState extends State<WorkReg> {
           ),
         );
 
-        // For workers, clear only the worker-specific fields to allow multiple registrations
         if (isWorker) {
           _descriptionController.clear();
           _rateController.clear();
           _selectedJobTitle = null;
-          // Keep other fields filled for convenience
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

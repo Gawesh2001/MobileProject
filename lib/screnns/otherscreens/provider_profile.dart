@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:flutter/services.dart'; // For clipboard functionality
+import 'package:flutter/services.dart';
 
 class WorkerProfile extends StatefulWidget {
   @override
@@ -369,8 +369,6 @@ class _WorkerProfileState extends State<WorkerProfile> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // You would typically use url_launcher here to make a call
-                      // For now, we'll just show a message
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('Calling $phoneNumber...'),
