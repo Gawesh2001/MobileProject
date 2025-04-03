@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gofinder/screnns/otherscreens/settings.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gofinder/screnns/authentication/sign_in.dart';
@@ -331,7 +332,14 @@ class ProfilePage extends StatelessWidget {
                       icon: Icons.settings,
                       iconColor: const Color.fromARGB(255, 209, 114, 5),
                       title: "Settings",
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SettingsPage(),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 16),

@@ -439,7 +439,7 @@ class _HomeState extends State<Home> {
     }
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 181, 182, 185),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Column(
