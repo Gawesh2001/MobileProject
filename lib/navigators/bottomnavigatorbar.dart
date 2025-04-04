@@ -54,7 +54,7 @@ class _BottomNavigatorBarState extends State<BottomNavigatorBar> {
             currentIndex: _selectedIndex,
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.white,
-            selectedItemColor: const Color(0xff0060D0),
+            selectedItemColor: const Color.fromARGB(255, 232, 51, 1),
             unselectedItemColor: Colors.grey[500],
             selectedLabelStyle: const TextStyle(
               fontSize: 10,

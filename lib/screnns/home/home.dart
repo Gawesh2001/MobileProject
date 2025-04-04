@@ -175,7 +175,7 @@ class _HomeState extends State<Home> {
               const Icon(
                 Icons.handyman,
                 size: 80,
-                color: Color(0xFF0060D0),
+                color: Color.fromRGBO(238, 62, 3, 1),
               ),
               const SizedBox(height: 20),
               Center(
@@ -184,7 +184,7 @@ class _HomeState extends State<Home> {
                   style: GoogleFonts.poppins(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0060D0),
+                    color: Color.fromARGB(255, 251, 63, 0),
                   ),
                 ),
               ),
@@ -321,7 +321,7 @@ class _HomeState extends State<Home> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF0060D0),
+                          backgroundColor: Color.fromARGB(255, 246, 86, 0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -403,7 +403,7 @@ class _HomeState extends State<Home> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF0060D0),
+                        backgroundColor: Color.fromARGB(255, 208, 66, 0),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -560,7 +560,7 @@ class _HomeState extends State<Home> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: _currentFeaturedIndex == index
-                        ? Color(0xFF0060D0)
+                        ? Color.fromARGB(255, 208, 49, 0)
                         : Colors.grey[300],
                   ),
                 ),

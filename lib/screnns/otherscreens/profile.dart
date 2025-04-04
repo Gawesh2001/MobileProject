@@ -160,14 +160,14 @@ class ProfilePage extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                backgroundColor: const Color(0xff0079C2),
+                backgroundColor: const Color.fromARGB(255, 246, 21, 0),
                 elevation: 0,
                 centerTitle: true,
               ),
               body: const Center(
                 child: CircularProgressIndicator(
-                  valueColor:
-                      const AlwaysStoppedAnimation<Color>(Color(0xff0079C2)),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                      Color.fromARGB(255, 234, 36, 1)),
                 ),
               ));
         }
@@ -185,7 +185,7 @@ class ProfilePage extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            backgroundColor: const Color(0xff0079C2),
+            backgroundColor: const Color.fromARGB(255, 227, 48, 4),
             elevation: 0,
             centerTitle: true,
             actions: [],
@@ -251,7 +251,7 @@ class ProfilePage extends StatelessWidget {
                   _buildSectionCard(
                     child: _buildListTile(
                       icon: Icons.app_registration,
-                      iconColor: Colors.blue,
+                      iconColor: const Color.fromARGB(255, 232, 86, 8),
                       title: "Register",
                       onTap: () {
                         Navigator.push(

@@ -68,14 +68,14 @@ class _BookingPageState extends State<BookingPage>
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xff0060D0),
+              primary: Color.fromARGB(255, 208, 0, 0),
               onPrimary: Colors.white,
               onSurface: Colors.black87,
             ),
             dialogBackgroundColor: Colors.white,
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xff0060D0),
+                foregroundColor: const Color.fromARGB(255, 208, 49, 0),
               ),
             ),
           ),
@@ -148,7 +148,7 @@ class _BookingPageState extends State<BookingPage>
                       style: GoogleFonts.poppins(
                         fontSize: 22,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xff0060D0),
+                        color: const Color.fromARGB(255, 234, 91, 8),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -168,7 +168,7 @@ class _BookingPageState extends State<BookingPage>
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xff0060D0),
+                        color: const Color.fromARGB(255, 238, 79, 5),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -201,7 +201,8 @@ class _BookingPageState extends State<BookingPage>
                             await _submitBooking();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xff0060D0),
+                            backgroundColor:
+                                const Color.fromARGB(255, 242, 82, 2),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -244,7 +245,7 @@ class _BookingPageState extends State<BookingPage>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: const Color(0xff0060D0)),
+          Icon(icon, size: 20, color: const Color.fromARGB(255, 208, 62, 0)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -284,7 +285,7 @@ class _BookingPageState extends State<BookingPage>
           child: const Icon(
             Icons.circle,
             size: 11,
-            color: Color(0xff0060D0),
+            color: Color.fromARGB(255, 235, 62, 5),
           ),
         ),
         const SizedBox(width: 12),
@@ -337,7 +338,7 @@ class _BookingPageState extends State<BookingPage>
         SnackBar(
           content: Text('Booking confirmed! Job #$jobNumber'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: const Color(0xff0060D0),
+          backgroundColor: const Color.fromARGB(255, 234, 41, 7),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -541,7 +542,7 @@ class _BookingPageState extends State<BookingPage>
                         ),
                         const Icon(
                           Icons.calendar_month_rounded,
-                          color: Color(0xff0060D0),
+                          color: Color.fromARGB(255, 254, 82, 3),
                         ),
                       ],
                     ),
@@ -604,7 +605,7 @@ class _BookingPageState extends State<BookingPage>
               child: ElevatedButton(
                 onPressed: _isSubmitting ? null : _showConfirmationDialog,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff0060D0),
+                  backgroundColor: const Color.fromARGB(255, 235, 49, 3),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

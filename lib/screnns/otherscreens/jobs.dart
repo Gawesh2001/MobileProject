@@ -282,7 +282,7 @@ class _JobsPageState extends State<JobsPage> {
                     child: ElevatedButton(
                       onPressed: () => _updateJobStatus(jobId, 'complete'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: const Color.fromARGB(255, 244, 45, 5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -313,7 +313,7 @@ class _JobsPageState extends State<JobsPage> {
         Icon(
           icon,
           size: 20,
-          color: Colors.blue,
+          color: const Color.fromARGB(255, 244, 30, 1),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -482,7 +482,7 @@ class _JobsPageState extends State<JobsPage> {
               'Clear filters',
               style: GoogleFonts.poppins(
                 fontSize: 16,
-                color: const Color(0xff0060D0),
+                color: const Color.fromARGB(255, 208, 59, 0),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -505,7 +505,7 @@ class _JobsPageState extends State<JobsPage> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: const Color(0xff0060D0),
+        backgroundColor: const Color.fromARGB(255, 236, 72, 2),
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
